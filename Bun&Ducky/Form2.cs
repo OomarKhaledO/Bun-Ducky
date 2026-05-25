@@ -15,10 +15,17 @@ namespace Bun_Ducky
 		public int X, Y;
 		public Bitmap img;
 	}
-	class hero
+    class door
+    {
+        public int x;
+        public int y;
+        public Bitmap img;
+    }
+    class hero
 	{
-		//============================
-		public List<Bitmap> walkImgsDuckRight;
+        //============================
+        public bool hasKey;
+        public List<Bitmap> walkImgsDuckRight;
 		public List<Bitmap> walkImgsDuckLeft;
 
 		public List<Bitmap> idelImgsDuckRight;
@@ -142,7 +149,8 @@ namespace Bun_Ducky
 	}
 	public partial class Form2 : Form
 	{
-		List<bg> bgs = new List<bg>();
+        List<door> doors = new List<door>();
+        List<bg> bgs = new List<bg>();
 		List<hero> heros = new List<hero>();
 		List<tile> tilesLvl1 = new List<tile>();
 		List<tile> tilesPLvl1 = new List<tile>();
@@ -177,10 +185,15 @@ namespace Bun_Ducky
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			//======
-			//LVL 1
-			//======
-			bg bb = new bg();
+            door d = new door();
+            d.img = new Bitmap("door.png");
+            d.x = 750;
+            d.y = 950; ;
+            doors.Add(d);
+            //======
+            //LVL 1
+            //======
+            bg bb = new bg();
 			bb.img = new Bitmap("bg.png");
 			bb.X = 0;
 			bb.Y = 0;
@@ -927,23 +940,30 @@ namespace Bun_Ducky
 					}
 					// if not on ladder, just ignore
 				}
-				else if (heros[0].isClimbDuckDn)
-				{
-					// only climb down if on a ladder
-					if (onLadder)
-					{
-						heros[0].currentIdleFrameDuckRight = 0;
-						heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
-						heros[0].yDuck += 8;
-					}
-				}
-				else if (onLadder && (heros[0].isClimbDuckUp || heros[0].isClimbDuckDn))
-				{
-					// on ladder, block left/right - idle only
-					heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
-				}
-				// ---- JUMP ----
-				else if (heros[0].isJumpDuckUp || heros[0].isJumpDuckRight || heros[0].isJumpDuckLeft)
+                else if (heros[0].isClimbDuckUp)
+                {
+                    if (onLadder)
+                    {
+                        heros[0].currentIdleFrameDuckRight = 0;
+                        heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
+                        heros[0].yDuck -= 8;
+                    }
+                }
+                else if (heros[0].isClimbDuckDn)
+                {
+                    if (onLadder)
+                    {
+                        heros[0].currentIdleFrameDuckRight = 0;
+                        heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
+                        heros[0].yDuck += 8;
+                    }
+                }
+                else if (onLadder && (heros[0].isClimbDuckUp || heros[0].isClimbDuckDn))
+                {
+                    heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
+                }
+                // ---- JUMP ----
+                else if (heros[0].isJumpDuckUp || heros[0].isJumpDuckRight || heros[0].isJumpDuckLeft)
 				{
 					// move horizontally while in air
 					if (heros[0].isJumpDuckRight)
@@ -1098,12 +1118,66 @@ namespace Bun_Ducky
 			{
 				yStart = maxY;
 			}
-			drawDb(CreateGraphics());
+            // key pickup
+            for (int i = keysLvl1.Count - 1; i >= 0; i--)
+            {
+                int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
+                int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
+                int heroW = heros[0].isRat ? 100 : 70;
+                int heroH = heros[0].isRat ? 100 : 70;
+
+                if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
+                {
+                    if (heroY + heroH >= keysLvl1[i].y && heroY <= keysLvl1[i].y + 30)
+                    {
+                        keysLvl1.RemoveAt(i);
+                        heros[0].hasKey = true;
+                    }
+                }
+            }
+            drawDb(CreateGraphics());
 		}
 
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.T)
+            if (e.KeyCode == Keys.E)
+            {
+                if (heros[0].hasKey)
+                {
+                    int heroX = 0;
+                    int heroY = 0;
+                    int heroW = 0;
+                    int heroH = 0;
+
+                    if (heros[0].isRat)
+                    {
+                        heroX = heros[0].xRabbit;
+                        heroY = heros[0].yRabbit;
+                        heroW = 100;
+                        heroH = 100;
+                    }
+                    else
+                    {
+                        heroX = heros[0].xDuck;
+                        heroY = heros[0].yDuck;
+                        heroW = 70;
+                        heroH = 70;
+                    }
+
+                    for (int i = doors.Count - 1; i >= 0; i--)
+                    {
+                        if (heroX + heroW >= doors[i].x && heroX <= doors[i].x + doors[i].img.Width)
+                        {
+                            if (heroY + heroH >= doors[i].y && heroY <= doors[i].y + doors[i].img.Height)
+                            {
+                                doors.RemoveAt(i);
+                                heros[0].hasKey = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if (e.KeyCode == Keys.T)
 			{
 				if (heros[0].isRat)
 				{
@@ -1273,6 +1347,10 @@ namespace Bun_Ducky
 						heros[0].isClimbDuckUp = true;
 						heros[0].isClimbDuckDn = false;
 						heros[0].isIdelDuck = false;
+						heros[0].isJumpDuckLeft = false;
+						heros[0].isJumpDuckRight = false;
+						heros[0].isJumpDuckUp  = false;
+
 					}
 				}
 				else
@@ -1378,7 +1456,7 @@ namespace Bun_Ducky
 
 			g2.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
 			g2.Clear(Color.Black);
-			for (int i = 0; i < bgs.Count; i++)
+            for (int i = 0; i < bgs.Count; i++)
 			{
 				bg pTrv = bgs[i];
 
@@ -1490,15 +1568,11 @@ namespace Bun_Ducky
 							g2.DrawImage(ptrv.idelImgsDuckRight[ptrv.currentIdleFrameDuckRight], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
 						}
 					}
-					else if (ptrv.isClimbDuckUp)
-					{
-						g2.DrawImage(ptrv.climbImgsDuck[ptrv.currentClimbFramesDuck], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
-					}
-					else if (ptrv.isClimbDuckDn)
-					{
-						g2.DrawImage(ptrv.climbImgsDuck[ptrv.currentClimbFramesDuck], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
-					}
-					else if (heros[0].isJumpDuckUp)
+                    else if (ptrv.isClimbDuckUp || ptrv.isClimbDuckDn || duckOnLadder())
+                    {
+                        g2.DrawImage(ptrv.climbImgsDuck[ptrv.currentClimbFramesDuck], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
+                    }
+                    else if (heros[0].isJumpDuckUp)
 					{
 						g2.DrawImage(ptrv.jumpImgsDuckRight[ptrv.currentJumpFrameDuckRight], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
 					}
@@ -1529,7 +1603,12 @@ namespace Bun_Ducky
 					}
 				}
 			}
-			for (int i = 0; i < boxes.Count; i++)
+            for (int i = 0; i < doors.Count; i++)
+            {
+                door ptrv = doors[i];
+                g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, 100, 150);
+            }
+            for (int i = 0; i < boxes.Count; i++)
 			{
 				box ptrv = boxes[i];
 				g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, 120, 120);
