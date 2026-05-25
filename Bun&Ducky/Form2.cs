@@ -15,10 +15,17 @@ namespace Bun_Ducky
 		public int X, Y;
 		public Bitmap img;
 	}
-	class hero
+    class door
+    {
+        public int x;
+        public int y;
+        public Bitmap img;
+    }
+    class hero
 	{
-		//============================
-		public List<Bitmap> walkImgsDuckRight;
+        //============================
+        public bool hasKey;
+        public List<Bitmap> walkImgsDuckRight;
 		public List<Bitmap> walkImgsDuckLeft;
 
 		public List<Bitmap> idelImgsDuckRight;
@@ -33,9 +40,9 @@ namespace Bun_Ducky
 		public List<Bitmap> climbImgsDuck;
 		public List<Bitmap> jumpImgsDuckRight;
 		public List<Bitmap> jumpImgsDuckLeft;
+
+
 		public int currentClimbFramesDuck;
-
-
 		public int currentWalkFramesDuckRight;
 		public int currentWalkFramesDuckLeft;
 
@@ -67,6 +74,10 @@ namespace Bun_Ducky
 		public bool isJumpDuckUp;
 		public bool isJumpDuckRight;
 		public bool isJumpDuckLeft;
+		public bool isPushDuckRight;
+		public bool isPushDuckLeft;
+		public bool canPushRight;
+		public bool canPushLeft;
 		//============================
 
 		public List<Bitmap> walkImgsRabbitRight;
@@ -130,9 +141,16 @@ namespace Bun_Ducky
 		public int y;
 		public Bitmap img;
 	}
+	class box
+	{
+		public int x;
+		public int y;
+		public Bitmap img;
+	}
 	public partial class Form2 : Form
 	{
-		List<bg> bgs = new List<bg>();
+        List<door> doors = new List<door>();
+        List<bg> bgs = new List<bg>();
 		List<hero> heros = new List<hero>();
 		List<tile> tilesLvl1 = new List<tile>();
 		List<tile> tilesPLvl1 = new List<tile>();
@@ -140,6 +158,7 @@ namespace Bun_Ducky
 		List<ladder> ladders = new List<ladder>();
 		List<key> keysLvl1 = new List<key>();
 		List<sewer> sewers = new List<sewer>();
+		List<box> boxes = new List<box>();
 		Bitmap off;
 		Timer gameTimer = new Timer();
 		int xStart = 0;
@@ -166,10 +185,15 @@ namespace Bun_Ducky
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			//======
-			//LVL 1
-			//======
-			bg bb = new bg();
+            door d = new door();
+            d.img = new Bitmap("door.png");
+            d.x = 750;
+            d.y = 950; ;
+            doors.Add(d);
+            //======
+            //LVL 1
+            //======
+            bg bb = new bg();
 			bb.img = new Bitmap("bg.png");
 			bb.X = 0;
 			bb.Y = 0;
@@ -193,6 +217,25 @@ namespace Bun_Ducky
 				tilesXInc += 70;
 				tilesLvl1.Add(g);
 			}
+			for (int i = 0; i < 1; i++)
+			{
+				box g = new box();
+				g.x = 305;
+				g.y = 930;
+				g.img = new Bitmap("lvl1\\box.png");
+				tilesXInc += 70;
+				boxes.Add(g);
+			}
+			tilesXInc = 0;
+			for (int i = 0; i < 1; i++)
+			{
+				box g = new box();
+				g.x = 930;
+				g.y = 1600;
+				g.img = new Bitmap("lvl1\\box.png");
+				tilesXInc += 70;
+				boxes.Add(g);
+			}
 			tilesXInc = 0;
 			for (int i = 0; i < 14; i++)
 			{
@@ -213,15 +256,26 @@ namespace Bun_Ducky
 				tilesLvl1.Add(g);
 			}
 			tilesXInc = 0;
-			for (int i = 0; i < 1; i++)
+			for (int i = 0; i < 2; i++)
 			{
 				ladder l = new ladder();
 				l.x = 100;
-				l.y = 700 + tilesYInc;
+				l.y = 660 + tilesYInc;
+				l.img = new Bitmap("lvl1\\ladder.png");
+				tilesYInc += 40;
+				ladders.Add(l);
+			}
+			tilesYInc = 0;
+			for (int i = 0; i < 3; i++)
+			{
+				ladder l = new ladder();
+				l.x = 1220;
+				l.y = 970 + tilesYInc;
 				l.img = new Bitmap("lvl1\\ladder.png");
 				tilesYInc += 200;
 				ladders.Add(l);
 			}
+			
 			tilesYInc = 0;
 			for (int i = 0; i < 2; i++)
 			{
@@ -303,18 +357,15 @@ namespace Bun_Ducky
 			}
 			tilesXInc = 0;
 			tilesYInc = 0;
-			for (int i = 0; i < 7; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				tile l = new tile();
-				l.x = 1880 + tilesXInc;
-				l.y = 1020 + tilesYInc;
-				l.img = new Bitmap("lvl1\\tiles\\tilleP.png");
-				tilesXInc += 20;
-				tilesYInc += 20;
-				tilesPLvl1.Add(l);
+				l.x = 1855;
+				l.y = 550 + tilesYInc;
+				l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
+				tilesYInc += 70;
+				tilesWLvl1.Add(l);
 			}
-			tilesXInc = 0;
-			tilesYInc = 0;
 			for (int i = 0; i < 4; i++)
 			{
 				tile l = new tile();
@@ -476,6 +527,7 @@ namespace Bun_Ducky
 				pnn.jumpImgsDuckLeft.Add(b);
 			}
 			//JUMP END
+
 			//   === DUCK /> ===
 
 
@@ -551,17 +603,284 @@ namespace Bun_Ducky
 			off = new Bitmap(this.ClientSize.Width, this.ClientSize.Height);
 		}
 
+		
+		bool duckOnTile()
+		{
+			int duckFeetY = heros[0].yDuck + 70;
+			int duckCenterX = heros[0].xDuck + 35;
+			for (int i = 0; i < tilesLvl1.Count; i++)
+			{
+				if (duckCenterX >= tilesLvl1[i].x && duckCenterX <= tilesLvl1[i].x + tilesLvl1[i].img.Width)
+				{
+					if (duckFeetY >= tilesLvl1[i].y && duckFeetY <= tilesLvl1[i].y + 15)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		
+		bool duckOnTileP()
+		{
+			int duckFeetY = heros[0].yDuck + 70;
+			int duckCenterX = heros[0].xDuck + 35;
+			for (int i = 0; i < tilesPLvl1.Count; i++)
+			{
+				if (duckCenterX >= tilesPLvl1[i].x && duckCenterX <= tilesPLvl1[i].x + 50)
+				{
+					if (duckFeetY >= tilesPLvl1[i].y && duckFeetY <= tilesPLvl1[i].y + 15)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		
+		bool duckOnBox()
+		{
+			int duckFeetY = heros[0].yDuck + 70;
+			int duckCenterX = heros[0].xDuck + 35;
+			for (int i = 0; i < boxes.Count; i++)
+			{
+				if (duckCenterX >= boxes[i].x && duckCenterX <= boxes[i].x + 120)
+				{
+					if (duckFeetY >= boxes[i].y && duckFeetY <= boxes[i].y + 15)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		
+		bool snapDuckToGround(int oldFeetY,int newFeetY)
+		{
+			int duckFeetY = heros[0].yDuck + 70;
+			int duckCenterX = heros[0].xDuck + 35;
+			
+			// check normal tiles
+			for (int i = 0; i < tilesLvl1.Count; i++)
+			{
+				if (duckCenterX >= tilesLvl1[i].x && duckCenterX <= tilesLvl1[i].x + tilesLvl1[i].img.Width)
+				{
+					if (oldFeetY <= tilesLvl1[i].y &&
+						newFeetY >= tilesLvl1[i].y)
+					{
+						heros[0].yDuck = tilesLvl1[i].y - 70;
+						return true;
+					}
+					
+				}
+			}
+
+			// check tileP tiles
+			for (int i = 0; i < tilesPLvl1.Count; i++)
+			{
+				if (duckCenterX >= tilesPLvl1[i].x && duckCenterX <= tilesPLvl1[i].x + 50)
+				{
+					if (oldFeetY <= tilesPLvl1[i].y &&
+						newFeetY >= tilesPLvl1[i].y)
+					{
+						heros[0].yDuck = tilesPLvl1[i].y - 70;
+						return true;
+					}
+				}
+			}
+
+			// check boxes
+			for (int i = 0; i < boxes.Count; i++)
+			{
+				if (duckCenterX >= boxes[i].x && duckCenterX <= boxes[i].x + 120)
+				{
+
+					if (oldFeetY <= boxes[i].y &&
+						newFeetY >= boxes[i].y)
+					{
+						heros[0].yDuck = boxes[i].y - 70;
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		
+		bool duckOnLadder()
+		{
+			int duckCenterX = heros[0].xDuck + 35;
+			int duckCenterY = heros[0].yDuck + 35;
+			for (int i = 0; i < ladders.Count; i++)
+			{
+				int ladderRight = ladders[i].x + ladders[i].img.Width + 20;
+				int ladderBottom = ladders[i].y + ladders[i].img.Height;
+
+				if (duckCenterX >= ladders[i].x && duckCenterX <= ladderRight)
+				{
+					if (duckCenterY + 10 >= ladders[i].y - 10 && duckCenterY <= ladderBottom)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		
+		bool rabbitOnSewer()
+		{
+			int rabbitCenterX = heros[0].xRabbit + 50;
+			int rabbitCenterY = heros[0].yRabbit + 50;
+			for (int i = 0; i < sewers.Count; i++)
+			{
+				int sewerRight = sewers[i].x + sewers[i].img.Width;
+				int sewerBottom = sewers[i].y + sewers[i].img.Height;
+				if (rabbitCenterX >= sewers[i].x && rabbitCenterX <= sewerRight)
+				{
+					if (rabbitCenterY >= sewers[i].y && rabbitCenterY <= sewerBottom)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		void applyGravityDuck()
+		{
+			if (duckOnLadder())
+			{
+				return;
+			}
+			if (heros[0].isClimbDuckUp || heros[0].isClimbDuckDn)
+			{
+				return;
+			}
+			if (heros[0].isJumpDuckUp || heros[0].isJumpDuckRight || heros[0].isJumpDuckLeft)
+			{
+				return;
+			}
+			if (duckOnTile() || duckOnTileP() || duckOnBox())
+			{
+				return;
+			}
+
+			int oldFeetY = heros[0].yDuck + 70;
+
+			heros[0].yDuck += 8;
+
+			int newFeetY = heros[0].yDuck + 70;
+
+
+			if (duckOnTile() || duckOnTileP() || duckOnBox())
+			{
+				snapDuckToGround(oldFeetY, newFeetY);
+			}
+		}
+		void checkWall(bool isRat)
+		{
+			if (isRat)
+			{
+				int rabbitRight = heros[0].xRabbit+ heros[0].runImgsRabbitRight[0].Width;
+				if (rabbitRight >= xStart + this.ClientSize.Width - 50)
+				{
+					heros[0].xRabbit= heros[0].xRabbit- 20;
+				}
+				if (heros[0].xRabbit <= 0)
+				{
+					heros[0].xRabbit = heros[0].xRabbit+ 20;
+				}
+			}
+			else
+			{
+				int duckRight = heros[0].xDuck + heros[0].walkImgsDuckRight[0].Width;
+				
+				if (duckRight >= xStart + this.ClientSize.Width)
+				{
+					heros[0].xDuck = heros[0].xDuck - 20;
+				}
+				if (heros[0].xDuck <= 0)
+				{
+					heros[0].xDuck = heros[0].xDuck + 20;
+				}
+			}
+			
+		}
 		private void GameTimer_Tick(object sender, EventArgs e)
 		{
 			this.Text = "" + heros[0].yDuck + "|||" + heros[0].xDuck;
-			//this.Text = $"bg:{bgs[0].img.Width}x{bgs[0].img.Height} screen:{ClientSize.Width}x{ClientSize.Height}";
+			heros[0].canPushRight = false;
+			heros[0].canPushLeft = false;
+			int box1 = -1;
+			for (int i = 0; i < boxes.Count; i++)
+			{
+				// PUSH RIGHT
+				if (heros[0].xDuck + 70 >= boxes[i].x - 15 &&
+					heros[0].xDuck + 70 <= boxes[i].x + 15)
+				{
+					if (heros[0].yDuck + 70 >= boxes[i].y + 20 &&
+						heros[0].yDuck <= boxes[i].y + 100)
+					{
+						heros[0].canPushRight = true;
+						box1 = i;
+						break;
+					}
+				}
 
+				// PUSH LEFT
+				if (heros[0].xDuck >= boxes[i].x + 120 - 15 &&
+					heros[0].xDuck <= boxes[i].x + 120 + 15)
+				{
+					if (heros[0].yDuck + 70 >= boxes[i].y + 20 &&
+						heros[0].yDuck <= boxes[i].y + 100)
+					{
+						heros[0].canPushLeft = true;
+						box1 = i;
+						break;
+					}
+				}
+			}
 			if (heros[0].isRat)
 			{
-				if (heros[0].isWalkRabbit)
+				// ===== RABBIT MOVEMENT =====
+				bool onSewer = rabbitOnSewer();
+
+				if (heros[0].isClimbRabbitUp)
+				{
+
+					if (onSewer)
+					{
+						heros[0].currentClimbFrameRabbitLeft = 0;
+						heros[0].currentIdelFrameRabbitRight = 0;
+						heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
+						heros[0].yRabbit -= 15;
+					}
+				}
+				else if (heros[0].isClimbRabbitDn)
+				{
+					if (onSewer)
+					{
+						heros[0].currentClimbFrameRabbitLeft = 0;
+						heros[0].currentIdelFrameRabbitRight = 0;
+						heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
+						heros[0].yRabbit += 15;
+					}
+				}
+				else if (onSewer)
+				{
+					// on sewer but not pressing climb -> block left/right movement, just idle
+					heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
+				}
+				else if (heros[0].isWalkRabbit)
 				{
 					if (heros[0].isRightRabbit)
 					{
+						checkWall(heros[0].isRat);
 						heros[0].currentIdelFrameRabbitLeft = 0;
 						heros[0].currentIdelFrameRabbitRight = 0;
 						heros[0].currentWalkFrameRabbitRight = (heros[0].currentWalkFrameRabbitRight + 1) % heros[0].walkImgsRabbitRight.Count;
@@ -569,6 +888,7 @@ namespace Bun_Ducky
 					}
 					else if (heros[0].isLeftRabbit)
 					{
+						checkWall(heros[0].isRat);
 						heros[0].currentRunFrameRabbitRight = 0;
 						heros[0].currentIdelFrameRabbitLeft = 0;
 						heros[0].currentWalkFrameRabbitLeft = (heros[0].currentWalkFrameRabbitLeft + 1) % heros[0].walkImgsRabbitLeft.Count;
@@ -579,12 +899,16 @@ namespace Bun_Ducky
 				{
 					if (heros[0].isRightRabbit)
 					{
+						checkWall(heros[0].isRat);
+
 						heros[0].currentIdelFrameRabbitRight = 0;
 						heros[0].currentRunFrameRabbitRight = (heros[0].currentRunFrameRabbitRight + 1) % heros[0].runImgsRabbitRight.Count;
 						heros[0].xRabbit += 15;
 					}
 					else if (heros[0].isLeftRabbit)
 					{
+						checkWall(heros[0].isRat);
+
 						heros[0].currentRunFrameRabbitRight = 0;
 						heros[0].currentIdelFrameRabbitLeft = 0;
 						heros[0].currentRunFrameRabbitLeft = (heros[0].currentRunFrameRabbitLeft + 1) % heros[0].runImgsRabbitLeft.Count;
@@ -592,48 +916,140 @@ namespace Bun_Ducky
 					}
 					else
 					{
-
 						heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
 					}
-				}
-				else if (heros[0].isClimbRabbitUp)
-				{
-					heros[0].currentClimbFrameRabbitLeft = 0;
-					heros[0].currentIdelFrameRabbitRight = 0;
-					heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
-					heros[0].yRabbit -= 15;
-
-				}
-				else if (heros[0].isClimbRabbitDn)
-				{
-					heros[0].currentClimbFrameRabbitLeft = 0;
-					heros[0].currentIdelFrameRabbitRight = 0;
-					heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
-					heros[0].yRabbit += 15;
-
 				}
 				else
 				{
 					heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
 				}
-
 			}
-
 			else
 			{
-				if (heros[0].isWalkDuck)
+				// ===== DUCK MOVEMENT =====
+				bool onLadder = duckOnLadder();
+
+				if (heros[0].isClimbDuckUp)
+				{
+					// only climb if on a ladder
+					if (onLadder)
+					{
+						heros[0].currentIdleFrameDuckRight = 0;
+						heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
+						heros[0].yDuck -= 8;
+					}
+					// if not on ladder, just ignore
+				}
+                else if (heros[0].isClimbDuckUp)
+                {
+                    if (onLadder)
+                    {
+                        heros[0].currentIdleFrameDuckRight = 0;
+                        heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
+                        heros[0].yDuck -= 8;
+                    }
+                }
+                else if (heros[0].isClimbDuckDn)
+                {
+                    if (onLadder)
+                    {
+                        heros[0].currentIdleFrameDuckRight = 0;
+                        heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
+                        heros[0].yDuck += 8;
+                    }
+                }
+                else if (onLadder && (heros[0].isClimbDuckUp || heros[0].isClimbDuckDn))
+                {
+                    heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
+                }
+                // ---- JUMP ----
+                else if (heros[0].isJumpDuckUp || heros[0].isJumpDuckRight || heros[0].isJumpDuckLeft)
+				{
+					// move horizontally while in air
+					if (heros[0].isJumpDuckRight)
+					{
+						heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
+						heros[0].xDuck += 5;
+					}
+					else if (heros[0].isJumpDuckLeft)
+					{
+						heros[0].currentJumpFrameDuckLeft = (heros[0].currentJumpFrameDuckLeft + 1) % heros[0].jumpImgsDuckLeft.Count;
+						heros[0].xDuck -= 5;
+					}
+					else
+					{
+						heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
+					}
+
+					// move vertically by jumpVelocity
+					int oldFeetY = heros[0].yDuck + 70;
+					heros[0].yDuck += heros[0].jumpVelocity;
+					heros[0].jumpVelocity += 2;
+					int newFeetY = heros[0].yDuck + 70;
+					// check landing
+					if (heros[0].jumpVelocity > 0)
+					{
+						// only check landing when falling down (velocity positive)
+						if (snapDuckToGround(oldFeetY, newFeetY))
+						{
+							heros[0].isJumpDuckUp = false;
+							heros[0].isJumpDuckRight = false;
+							heros[0].isJumpDuckLeft = false;
+							heros[0].jumpVelocity = 0;
+						}
+					}
+				}
+				// ---- WALK / RUN / ATTACK / IDLE ----
+				else if (heros[0].isWalkDuck)
 				{
 					if (heros[0].isRightDuck)
 					{
 						heros[0].currentIdleFrameDuckLeft = 0;
-						heros[0].currentWalkFramesDuckRight = (heros[0].currentWalkFramesDuckRight + 1) % heros[0].walkImgsDuckRight.Count;
-						heros[0].xDuck += 5;
+
+						// PUSHING
+						if (heros[0].canPushRight)
+						{
+							heros[0].isPushDuckRight = true;
+							heros[0].isPushDuckLeft = false;
+							heros[0].currentWalkFramesDuckRight = 0;
+							heros[0].xDuck += 3;
+							boxes[box1].x += 3;
+						}
+						else
+						{
+							heros[0].isPushDuckRight = false;
+
+							heros[0].currentWalkFramesDuckRight =
+							(heros[0].currentWalkFramesDuckRight + 1) %
+							heros[0].walkImgsDuckRight.Count;
+
+							heros[0].xDuck += 5;
+						}
 					}
 					else if (heros[0].isLeftDuck)
 					{
 						heros[0].currentIdleFrameDuckRight = 0;
-						heros[0].currentWalkFramesDuckLeft = (heros[0].currentWalkFramesDuckLeft + 1) % heros[0].walkImgsDuckLeft.Count;
-						heros[0].xDuck -= 5;
+
+						// PUSHING
+						if (heros[0].canPushLeft)
+						{
+							heros[0].isPushDuckLeft = true;
+							heros[0].currentWalkFramesDuckLeft = 0;
+							heros[0].isPushDuckRight = false;
+
+							heros[0].xDuck -= 3;
+							boxes[box1].x -= 3;
+						}
+						else
+						{
+							heros[0].isPushDuckLeft = false;
+
+							heros[0].currentWalkFramesDuckLeft =
+							(heros[0].currentWalkFramesDuckLeft + 1) %
+							heros[0].walkImgsDuckLeft.Count;
+
+							heros[0].xDuck -= 5;
+						}
 					}
 				}
 				else if (heros[0].isRunDuck)
@@ -648,7 +1064,6 @@ namespace Bun_Ducky
 					{
 						heros[0].currentIdleFrameDuckLeft = 0;
 						heros[0].currentRunFrameDuckLeft = (heros[0].currentRunFrameDuckLeft + 1) % heros[0].runImgsDuckLeft.Count;
-
 						heros[0].xDuck -= 15;
 					}
 					else
@@ -659,67 +1074,11 @@ namespace Bun_Ducky
 				else if (heros[0].isAttkDuck)
 				{
 					heros[0].currentIdleFrameDuckRight = 0;
-
 					heros[0].currentAttkFrameDuckRight++;
-
 					if (heros[0].currentAttkFrameDuckRight >= heros[0].attkImgsDuckRight.Count)
 					{
 						heros[0].currentAttkFrameDuckRight = 0;
 						heros[0].isAttkDuck = false;
-					}
-				}
-				else if (heros[0].isClimbDuckUp)
-				{
-					heros[0].currentIdleFrameDuckRight = 0;
-					heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
-					heros[0].yDuck -= 8;
-				}
-				else if (heros[0].isClimbDuckDn)
-				{
-					heros[0].currentIdleFrameDuckRight = 0;
-					heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
-					heros[0].yDuck += 8;
-				}
-				else if (heros[0].isJumpDuckUp)
-				{
-					heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
-					heros[0].yDuck += heros[0].jumpVelocity;
-					heros[0].jumpVelocity += 2;
-
-
-					if (heros[0].yDuck >= tilesLvl1[0].y - 70)
-					{
-						heros[0].yDuck = tilesLvl1[0].y - 70;
-						heros[0].isJumpDuckUp = false;
-						heros[0].jumpVelocity = 0;
-					}
-				}
-				else if (heros[0].isJumpDuckRight)
-				{
-					heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
-					heros[0].yDuck += heros[0].jumpVelocity;
-					heros[0].xDuck += 5;
-					heros[0].jumpVelocity += 2;
-
-					if (heros[0].yDuck >= tilesLvl1[0].y - 70)
-					{
-						heros[0].yDuck = tilesLvl1[0].y - 70;
-						heros[0].isJumpDuckRight = false;
-						heros[0].jumpVelocity = 0;
-					}
-				}
-				else if (heros[0].isJumpDuckLeft)
-				{
-					heros[0].currentJumpFrameDuckLeft = (heros[0].currentJumpFrameDuckLeft + 1) % heros[0].jumpImgsDuckLeft.Count;
-					heros[0].yDuck += heros[0].jumpVelocity;
-					heros[0].xDuck -= 5;
-					heros[0].jumpVelocity += 2;
-
-					if (heros[0].yDuck >= tilesLvl1[0].y - 70)
-					{
-						heros[0].yDuck = tilesLvl1[0].y - 70;
-						heros[0].isJumpDuckLeft = false;
-						heros[0].jumpVelocity = 0;
 					}
 				}
 				else
@@ -727,7 +1086,10 @@ namespace Bun_Ducky
 					heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
 				}
 
+				// apply gravity every tick for duck (when not climbing or jumping)
+				applyGravityDuck();
 			}
+
 			if (!heros[0].isRat)
 			{
 				xStart = heros[0].xDuck - this.ClientSize.Width / 2;
@@ -748,7 +1110,6 @@ namespace Bun_Ducky
 			}
 			int maxX = bgs[0].img.Width - this.ClientSize.Width;
 			int maxY = bgs[0].img.Height - this.ClientSize.Height;
-
 			if (xStart > maxX)
 			{
 				xStart = maxX;
@@ -757,12 +1118,66 @@ namespace Bun_Ducky
 			{
 				yStart = maxY;
 			}
-			drawDb(CreateGraphics());
+            // key pickup
+            for (int i = keysLvl1.Count - 1; i >= 0; i--)
+            {
+                int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
+                int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
+                int heroW = heros[0].isRat ? 100 : 70;
+                int heroH = heros[0].isRat ? 100 : 70;
+
+                if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
+                {
+                    if (heroY + heroH >= keysLvl1[i].y && heroY <= keysLvl1[i].y + 30)
+                    {
+                        keysLvl1.RemoveAt(i);
+                        heros[0].hasKey = true;
+                    }
+                }
+            }
+            drawDb(CreateGraphics());
 		}
 
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.T)
+            if (e.KeyCode == Keys.E)
+            {
+                if (heros[0].hasKey)
+                {
+                    int heroX = 0;
+                    int heroY = 0;
+                    int heroW = 0;
+                    int heroH = 0;
+
+                    if (heros[0].isRat)
+                    {
+                        heroX = heros[0].xRabbit;
+                        heroY = heros[0].yRabbit;
+                        heroW = 100;
+                        heroH = 100;
+                    }
+                    else
+                    {
+                        heroX = heros[0].xDuck;
+                        heroY = heros[0].yDuck;
+                        heroW = 70;
+                        heroH = 70;
+                    }
+
+                    for (int i = doors.Count - 1; i >= 0; i--)
+                    {
+                        if (heroX + heroW >= doors[i].x && heroX <= doors[i].x + doors[i].img.Width)
+                        {
+                            if (heroY + heroH >= doors[i].y && heroY <= doors[i].y + doors[i].img.Height)
+                            {
+                                doors.RemoveAt(i);
+                                heros[0].hasKey = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if (e.KeyCode == Keys.T)
 			{
 				if (heros[0].isRat)
 				{
@@ -789,25 +1204,33 @@ namespace Bun_Ducky
 			{
 				if (heros[0].isRat)
 				{
-					heros[0].isRightRabbit = true;
-					heros[0].isWalkRabbit = true;
-					heros[0].isIdelRabbit = false;
-					if (heros[0].isRunRabbit)
+					// only move right if not on a sewer
+					if (!rabbitOnSewer())
 					{
-						heros[0].isRunRabbit = true;
-						heros[0].isWalkRabbit = false;
+						heros[0].isRightRabbit = true;
+						heros[0].isWalkRabbit = true;
 						heros[0].isIdelRabbit = false;
+						if (heros[0].isRunRabbit)
+						{
+							heros[0].isRunRabbit = true;
+							heros[0].isWalkRabbit = false;
+							heros[0].isIdelRabbit = false;
+						}
 					}
 				}
 				if (!heros[0].isRat && !heros[0].isJumpDuckRight && !heros[0].isJumpDuckLeft && !heros[0].isJumpDuckUp)
 				{
-					heros[0].isRightDuck = true;
-					heros[0].isWalkDuck = true;
-					heros[0].isIdelDuck = false;
-					if (heros[0].isRunDuck)
+					// only move right if not actively on ladder with climb pressed
+					if (!duckOnLadder() || (!heros[0].isClimbDuckUp && !heros[0].isClimbDuckDn))
 					{
-						heros[0].isRunDuck = true;
-						heros[0].isWalkDuck = false;
+						heros[0].isRightDuck = true;
+						heros[0].isWalkDuck = true;
+						heros[0].isIdelDuck = false;
+						if (heros[0].isRunDuck)
+						{
+							heros[0].isRunDuck = true;
+							heros[0].isWalkDuck = false;
+						}
 					}
 				}
 			}
@@ -815,19 +1238,24 @@ namespace Bun_Ducky
 			{
 				if (heros[0].isRat)
 				{
-					heros[0].isLeftRabbit = true;
-					heros[0].isWalkRabbit = true;
-					heros[0].isIdelRabbit = false;
-					if (heros[0].isRunRabbit)
+					// only move left if not on a sewer
+					if (!rabbitOnSewer())
 					{
-						heros[0].isRunRabbit = true;
-						heros[0].isWalkRabbit = false;
+						heros[0].isLeftRabbit = true;
+						heros[0].isWalkRabbit = true;
 						heros[0].isIdelRabbit = false;
+						if (heros[0].isRunRabbit)
+						{
+							heros[0].isRunRabbit = true;
+							heros[0].isWalkRabbit = false;
+							heros[0].isIdelRabbit = false;
+						}
 					}
 				}
-				if (e.KeyCode == Keys.Left)
+				if (!heros[0].isRat && !heros[0].isJumpDuckRight && !heros[0].isJumpDuckLeft && !heros[0].isJumpDuckUp)
 				{
-					if (!heros[0].isRat && !heros[0].isJumpDuckRight && !heros[0].isJumpDuckLeft && !heros[0].isJumpDuckUp)
+					// only move left if not actively on ladder with climb pressed
+					if (!duckOnLadder() || (!heros[0].isClimbDuckUp && !heros[0].isClimbDuckDn))
 					{
 						heros[0].isLeftDuck = true;
 						heros[0].isWalkDuck = true;
@@ -865,20 +1293,24 @@ namespace Bun_Ducky
 			{
 				if (!heros[0].isRat && !heros[0].isJumpDuckRight && !heros[0].isJumpDuckLeft && !heros[0].isJumpDuckUp)
 				{
-					if (heros[0].isRightDuck)
+					// cannot jump while on ladder climbing
+					if (!heros[0].isClimbDuckUp && !heros[0].isClimbDuckDn)
 					{
-						heros[0].isJumpDuckRight = true;
-						heros[0].jumpVelocity = -18;
-					}
-					else if (heros[0].isLeftDuck)
-					{
-						heros[0].isJumpDuckLeft = true;
-						heros[0].jumpVelocity = -18;
-					}
-					else
-					{
-						heros[0].isJumpDuckUp = true;
-						heros[0].jumpVelocity = -18;
+						if (heros[0].isRightDuck)
+						{
+							heros[0].isJumpDuckRight = true;
+							heros[0].jumpVelocity = -18;
+						}
+						else if (heros[0].isLeftDuck)
+						{
+							heros[0].isJumpDuckLeft = true;
+							heros[0].jumpVelocity = -18;
+						}
+						else
+						{
+							heros[0].isJumpDuckUp = true;
+							heros[0].jumpVelocity = -18;
+						}
 					}
 				}
 			}
@@ -886,33 +1318,52 @@ namespace Bun_Ducky
 			{
 				if (!heros[0].isRat)
 				{
-					heros[0].isIdelDuck = false;
-					heros[0].isClimbDuckDn = true;
-					heros[0].isClimbDuckUp = false;
-
+					// only allow climb down if on a ladder
+					if (duckOnLadder())
+					{
+						heros[0].isIdelDuck = false;
+						heros[0].isClimbDuckDn = true;
+						heros[0].isClimbDuckUp = false;
+					}
 				}
 				else
 				{
-					heros[0].isIdelRabbit = false;
-					heros[0].isClimbRabbitDn = true;
-					heros[0].isClimbRabbitUp = false;
+					// only allow climb down if on a sewer
+					if (rabbitOnSewer())
+					{
+						heros[0].isIdelRabbit = false;
+						heros[0].isClimbRabbitDn = true;
+						heros[0].isClimbRabbitUp = false;
+					}
 				}
 			}
 			if (e.KeyCode == Keys.C)
 			{
 				if (!heros[0].isRat)
 				{
-					heros[0].isClimbDuckUp = true;
-					heros[0].isClimbDuckDn = false;
+					// only allow climb up if on a ladder
+					if (duckOnLadder())
+					{
+						heros[0].isClimbDuckUp = true;
+						heros[0].isClimbDuckDn = false;
+						heros[0].isIdelDuck = false;
+						heros[0].isJumpDuckLeft = false;
+						heros[0].isJumpDuckRight = false;
+						heros[0].isJumpDuckUp  = false;
 
-					heros[0].isIdelDuck = false;
+					}
 				}
 				else
 				{
-					heros[0].isClimbRabbitUp = true;
-					heros[0].isIdelRabbit = false;
+					// only allow climb up if on a sewer
+					if (rabbitOnSewer())
+					{
+						heros[0].isClimbRabbitUp = true;
+						heros[0].isIdelRabbit = false;
+					}
 				}
 			}
+
 		}
 
 		private void Form1_KeyUp(object sender, KeyEventArgs e)
@@ -955,6 +1406,7 @@ namespace Bun_Ducky
 					heros[0].isWalkDuck = false;
 					heros[0].isRightDuck = false;
 					heros[0].isRunDuck = false;
+					heros[0].isPushDuckRight = false;
 					heros[0].isIdelDuck = true;
 
 				}
@@ -968,6 +1420,8 @@ namespace Bun_Ducky
 					heros[0].isRunDuck = false;
 					heros[0].isLeftDuck = false;
 					heros[0].isWalkDuck = false;
+					heros[0].isPushDuckLeft = false;
+
 					heros[0].isIdelDuck = true;
 				}
 				if (e.KeyCode == Keys.C)
@@ -977,9 +1431,7 @@ namespace Bun_Ducky
 				if (e.KeyCode == Keys.Down)
 				{
 					heros[0].isClimbDuckDn = false;
-
 				}
-
 			}
 		}
 
@@ -1004,7 +1456,7 @@ namespace Bun_Ducky
 
 			g2.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
 			g2.Clear(Color.Black);
-			for (int i = 0; i < bgs.Count; i++)
+            for (int i = 0; i < bgs.Count; i++)
 			{
 				bg pTrv = bgs[i];
 
@@ -1047,13 +1499,12 @@ namespace Bun_Ducky
 				key ptrv = keysLvl1[i];
 				g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, 30, 30);
 			}
+
 			for (int i = 0; i < heros.Count; i++)
 			{
 				hero ptrv = heros[i];
 				if (ptrv.isRat)
 				{
-					//int ratY = (ptrv.yDuck + ptrv.idelImgsDuckRight[0].Height) - 15; // aligns rat's feet with human's feet
-
 					if (ptrv.isWalkRabbit)
 					{
 						if (ptrv.isRightRabbit)
@@ -1082,16 +1533,6 @@ namespace Bun_Ducky
 					}
 					else if (ptrv.isClimbRabbitUp || ptrv.isClimbRabbitDn)
 					{
-						/*
-						if (ptrv.isRightRabbit)
-						{
-							g2.DrawImage(ptrv.climbImgsRabbitRight[ptrv.currentClimbFrameRabbitRight], ptrv.xRabbit - xStart, ptrv.yRabbit - yStart, 100, 100);
-						}
-						else if (ptrv.isLeftRabbit)
-						{
-							g2.DrawImage(ptrv.climbImgsRabbitLeft[ptrv.currentClimbFrameRabbitLeft], ptrv.xRabbit - xStart, ptrv.yRabbit - yStart, 100, 100);
-						}
-						*/
 						g2.DrawImage(ptrv.climbImgsRabbitRight[ptrv.currentClimbFrameRabbitRight], ptrv.xRabbit - xStart, ptrv.yRabbit - yStart, 100, 100);
 					}
 					else
@@ -1127,15 +1568,11 @@ namespace Bun_Ducky
 							g2.DrawImage(ptrv.idelImgsDuckRight[ptrv.currentIdleFrameDuckRight], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
 						}
 					}
-					else if (ptrv.isClimbDuckUp)
-					{
-						g2.DrawImage(ptrv.climbImgsDuck[ptrv.currentClimbFramesDuck], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
-					}
-					else if (ptrv.isClimbDuckDn)
-					{
-						g2.DrawImage(ptrv.climbImgsDuck[ptrv.currentClimbFramesDuck], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
-					}
-					else if (heros[0].isJumpDuckUp)
+                    else if (ptrv.isClimbDuckUp || ptrv.isClimbDuckDn || duckOnLadder())
+                    {
+                        g2.DrawImage(ptrv.climbImgsDuck[ptrv.currentClimbFramesDuck], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
+                    }
+                    else if (heros[0].isJumpDuckUp)
 					{
 						g2.DrawImage(ptrv.jumpImgsDuckRight[ptrv.currentJumpFrameDuckRight], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
 					}
@@ -1150,7 +1587,6 @@ namespace Bun_Ducky
 					/*
 					else if (ptrv.isAttkDuck)
 					{
-
 						if (ptrv.isRightDuck)
 						{
 							g2.DrawImage(ptrv.attkImgsDuckRight[ptrv.currentAttkFrameDuckRight], ptrv.xDuck, ptrv.yDuck, 100, 100);
@@ -1165,11 +1601,18 @@ namespace Bun_Ducky
 					{
 						g2.DrawImage(ptrv.idelImgsDuckRight[ptrv.currentIdleFrameDuckRight], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
 					}
-
 				}
 			}
-
-
+            for (int i = 0; i < doors.Count; i++)
+            {
+                door ptrv = doors[i];
+                g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, 100, 150);
+            }
+            for (int i = 0; i < boxes.Count; i++)
+			{
+				box ptrv = boxes[i];
+				g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, 120, 120);
+			}
 		}
 	}
 }
