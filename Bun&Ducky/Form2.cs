@@ -2016,7 +2016,7 @@ namespace Bun_Ducky
 
 			g2.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
 			g2.Clear(Color.Black);
-			for (int i = 0; i < bgs.Count; i++)
+            for (int i = 0; i < bgs.Count; i++)
 			{
 				bg pTrv = bgs[i];
 
