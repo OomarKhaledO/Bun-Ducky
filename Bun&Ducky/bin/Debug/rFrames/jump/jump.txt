@@ -1,0 +1,528 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+
+namespace testingGame
+{
+	class hero
+	{
+		//============================
+		public List<Bitmap> walkIH;
+		public List<Bitmap> idelIH;
+		public List<Bitmap> runIH;
+		public List<Bitmap> attkIH;
+		public int walkFH;
+		public int idelFH;
+		public int attkFH;
+		public int runFH;
+		public int xh;
+		public int yh;
+		public bool isWalkH;
+		public bool isRunH;
+		public bool isIdelH;
+		public bool isAttkH;
+		public bool isRightH;
+		public bool isLeftH;
+		//============================
+		public List<Bitmap> walkIR;
+		public List<Bitmap> idelIR;
+		public List<Bitmap> runIR;
+
+		public List<Bitmap> walkIRL;
+		public List<Bitmap> idelIRL;
+		public List<Bitmap> runIRL;
+		public List<Bitmap> jumpIR;
+		public List<Bitmap> jumpIRL;
+		public List<Bitmap> landIRL;
+
+		public int walkFR;
+		public int idelFR;
+		public int runFR;
+		public int jumpFR;
+
+		public int walkFRL;
+		public int idelFRL;
+		public int runFRL;
+		public int jumpFRL;
+
+		public int xr;
+		public int yr;
+		public bool isWalkR;
+		public bool isRunR;
+		public bool isIdelR;
+		public bool isJumpR;
+		public bool isJumpRL;
+		public bool isWalkRL;
+		public bool isRunRL;
+		public bool isIdelRL;
+
+		public bool isRightR;
+		public bool isLeftR;
+		public bool facingLeftR;
+
+		// --- Jump physics ---
+		public bool isJumping;        // currently airborne
+		public bool isTjump;          // playing transition frames before lift-off
+		public int tjumpFrame;        // current Tjump frame index
+		public int tjumpDelay;        // tick counter so Tjump frames don't flash by instantly
+		public float velY;            // vertical velocity (pixels per tick, negative = up)
+		public int groundY;           // Y position considered "on the ground" for the rat
+									  //============================
+		public bool isRat;
+	}
+
+	class ground
+	{
+		public int x;
+		public int y;
+		public int w;
+		public int h;
+		public Color clr;
+	}
+
+	public partial class Form1 : Form
+	{
+		List<hero> heros = new List<hero>();
+		List<ground> grounds = new List<ground>();
+		Bitmap off;
+		Timer gameTimer = new Timer();
+
+		// Physics constants
+		const float Gravity = 0.55f;   // pixels added to velY each tick
+		const float JumpStrength = -11.0f;  // initial upward velocity (negative = up)
+		const int TjumpFrameDelay = 4;    // ticks per Tjump frame (adjust for feel)
+
+		public Form1()
+		{
+			this.WindowState = FormWindowState.Maximized;
+
+			Load += Form1_Load;
+			Paint += Form1_Paint;
+			KeyDown += Form1_KeyDown;
+			KeyUp += Form1_KeyUp;
+
+			gameTimer.Interval = 16;
+			gameTimer.Tick += GameTimer_Tick;
+			gameTimer.Start();
+		}
+
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			ground g = new ground();
+			g.x = 0;
+			g.y = 620;
+			g.w = this.ClientSize.Width;
+			g.h = this.ClientSize.Height;
+			g.clr = Color.BlueViolet;
+			grounds.Add(g);
+
+			hero pnn = new hero();
+
+			//   === < HUMAN ===
+			pnn.xh = 500;
+			pnn.yh = 500;
+			pnn.walkIH = new List<Bitmap>();
+			pnn.idelIH = new List<Bitmap>();
+			pnn.runIH = new List<Bitmap>();
+			pnn.attkIH = new List<Bitmap>();
+
+			for (int i = 0; i < 6; i++) pnn.idelIH.Add(new Bitmap("hFrames\\idel\\Idle" + (i + 1) + ".png"));
+			for (int i = 0; i < 10; i++) pnn.walkIH.Add(new Bitmap("hFrames\\walk\\Walk" + (i + 1) + ".png"));
+			for (int i = 0; i < 10; i++) pnn.runIH.Add(new Bitmap("hFrames\\run\\Run" + (i + 1) + ".png"));
+			for (int i = 0; i < 4; i++) pnn.attkIH.Add(new Bitmap("hFrames\\attack\\Attack" + (i + 1) + ".png"));
+			//   === HUMAN /> ===
+
+			//   === < RAT ===
+			pnn.xr = 500;
+			pnn.yr = pnn.yh + 50;
+			pnn.walkIR = new List<Bitmap>();
+			pnn.idelIR = new List<Bitmap>();
+			pnn.runIR = new List<Bitmap>();
+			pnn.walkIRL = new List<Bitmap>();
+			pnn.idelIRL = new List<Bitmap>();
+			pnn.runIRL = new List<Bitmap>();
+			pnn.jumpIR = new List<Bitmap>();
+			pnn.jumpIRL = new List<Bitmap>();
+
+			for (int i = 0; i < 6; i++) pnn.idelIR.Add(new Bitmap("rFrames\\idel\\idle" + (i + 1) + ".png"));
+			for (int i = 0; i < 8; i++) pnn.walkIR.Add(new Bitmap("rFrames\\walk\\walk" + (i + 1) + ".png"));
+			for (int i = 0; i < 8; i++) pnn.runIR.Add(new Bitmap("rFrames\\run\\run" + (i + 1) + ".png"));
+			for (int i = 0; i < 6; i++) pnn.idelIRL.Add(new Bitmap("rFrames\\idel\\idleB" + (i + 1) + ".png"));
+			for (int i = 0; i < 8; i++) pnn.walkIRL.Add(new Bitmap("rFrames\\walk\\walkB" + (i + 1) + ".png"));
+			for (int i = 0; i < 8; i++) pnn.runIRL.Add(new Bitmap("rFrames\\run\\runB" + (i + 1) + ".png"));
+
+			// jumpIRL holds: Tjump1, Tjump2 (transition), then jump1, jump2, jump3 (airborne)
+			for (int i = 0; i < 2; i++) pnn.jumpIRL.Add(new Bitmap("rFrames\\jump\\Tjump" + (i + 1) + ".png"));
+			for (int i = 0; i < 3; i++) pnn.jumpIRL.Add(new Bitmap("rFrames\\jump\\jump" + (i + 1) + ".png"));
+
+			// groundY: the Y at which the rat stands still (top-left corner of its sprite)
+			// Matches the ratY calculation used in drawScene: (yh + idelIH[0].Height) - 100
+			pnn.groundY = (pnn.yh + pnn.idelIH[0].Height) - 100;
+			pnn.yr = pnn.groundY;
+			//   === RAT /> ===
+
+			heros.Add(pnn);
+			off = new Bitmap(this.ClientSize.Width, this.ClientSize.Height);
+		}
+
+		private void GameTimer_Tick(object sender, EventArgs e)
+		{
+			if (heros[0].isRat)
+			{
+				hero h = heros[0];
+
+				// ── JUMP TRANSITION (Tjump frames) ──────────────────────────────────
+				// Tjump frames are the first 2 entries in jumpIRL.
+				// We play them on the ground before applying velocity.
+				if (h.isTjump)
+				{
+					h.tjumpDelay++;
+					if (h.tjumpDelay >= TjumpFrameDelay)
+					{
+						h.tjumpDelay = 0;
+						h.tjumpFrame++;
+
+						// 2 Tjump frames (indices 0 and 1)
+						if (h.tjumpFrame >= 2)
+						{
+							// Transition done — go airborne
+							h.isTjump = false;
+							h.isJumping = true;
+							h.velY = JumpStrength;
+							h.jumpFRL = 2; // start at first real jump frame (index 2 in jumpIRL)
+						}
+					}
+					// Don't advance any movement while in transition
+					drawDb(CreateGraphics());
+					return;
+				}
+
+				// ── GRAVITY + AIRBORNE ──────────────────────────────────────────────
+				if (h.isJumping)
+				{
+					h.velY += Gravity;
+					h.yr += (int)h.velY;
+
+					// Horizontal movement still works during a jump
+					if (h.isRightR)
+					{
+						h.xr += h.isRunR ? 8 : 3;
+						h.facingLeftR = false;
+					}
+					else if (h.isLeftR)
+					{
+						h.xr -= h.isRunRL ? 8 : 3;
+						h.facingLeftR = true;
+					}
+
+					// Advance airborne frames (indices 2-4 in jumpIRL), hold last frame at apex/descent
+					if (h.jumpFRL < h.jumpIRL.Count - 1)
+						h.jumpFRL++;
+
+					// Landing check
+					if (h.yr >= h.groundY)
+					{
+						h.yr = h.groundY;
+						h.velY = 0;
+						h.isJumping = false;
+						h.jumpFRL = 0;
+					}
+
+					drawDb(CreateGraphics());
+					return;
+				}
+
+				// ── GROUND MOVEMENT (your original logic, unchanged) ─────────────
+				if (h.isRightR && h.isRunR)
+				{
+					h.idelFR = 0;
+					h.runFR = (h.runFR + 1) % h.runIR.Count;
+					h.xr += 8;
+					h.facingLeftR = false;
+				}
+				else if (h.isRightR && h.isWalkR)
+				{
+					h.idelFR = 0;
+					h.walkFR = (h.walkFR + 1) % h.walkIR.Count;
+					h.xr += 3;
+					h.facingLeftR = false;
+				}
+				else if (h.isLeftR && h.isRunRL)
+				{
+					h.idelFRL = 0;
+					h.runFRL = (h.runFRL + 1) % h.runIRL.Count;
+					h.xr -= 8;
+					h.facingLeftR = true;
+				}
+				else if (h.isLeftR && h.isWalkR)
+				{
+					h.idelFRL = 0;
+					h.walkFRL = (h.walkFRL + 1) % h.walkIRL.Count;
+					h.xr -= 3;
+					h.facingLeftR = true;
+				}
+				else if (h.facingLeftR)
+				{
+					h.idelFRL = (h.idelFRL + 1) % h.idelIRL.Count;
+				}
+				else
+				{
+					h.idelFR = (h.idelFR + 1) % h.idelIR.Count;
+				}
+			}
+			else
+			{
+				// ── HUMAN (unchanged) ───────────────────────────────────────────────
+				if (heros[0].isWalkH)
+				{
+					heros[0].idelFH = 0;
+					heros[0].walkFH = (heros[0].walkFH + 1) % heros[0].walkIH.Count;
+					if (heros[0].isRightH) heros[0].xh += 3;
+					else if (heros[0].isLeftH) heros[0].xh -= 3;
+				}
+				else if (heros[0].isRunH && (heros[0].isRightH || heros[0].isLeftH))
+				{
+					heros[0].idelFH = 0;
+					heros[0].runFH = (heros[0].runFH + 1) % heros[0].runIH.Count;
+					if (heros[0].isRightH) heros[0].xh += 8;
+					else if (heros[0].isLeftH) heros[0].xh -= 8;
+				}
+				else if (heros[0].isAttkH)
+				{
+					heros[0].idelFH = 0;
+					heros[0].attkFH++;
+					if (heros[0].attkFH >= heros[0].attkIH.Count)
+					{
+						heros[0].attkFH = 0;
+						heros[0].isAttkH = false;
+					}
+				}
+				else
+				{
+					heros[0].idelFH = (heros[0].idelFH + 1) % heros[0].idelIH.Count;
+				}
+			}
+
+			drawDb(CreateGraphics());
+		}
+
+		private void Form1_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.T)
+				heros[0].isRat = true;
+
+			if (e.KeyCode == Keys.Right)
+			{
+				if (heros[0].isRat)
+				{
+					heros[0].isRightR = true;
+					heros[0].isLeftR = false;
+					heros[0].isRunRL = false;
+					heros[0].isWalkR = !heros[0].isRunR;
+					heros[0].isIdelR = false;
+				}
+				else
+				{
+					heros[0].isRightH = true;
+					heros[0].isWalkH = true;
+					heros[0].isIdelH = false;
+					if (heros[0].isRunH) heros[0].isWalkH = false;
+				}
+			}
+
+			if (e.KeyCode == Keys.Left)
+			{
+				if (heros[0].isRat)
+				{
+					heros[0].isLeftR = true;
+					heros[0].isRightR = false;
+					heros[0].isRunR = false;
+					heros[0].isWalkR = !heros[0].isRunRL;
+					heros[0].isIdelR = false;
+				}
+				else
+				{
+					heros[0].isLeftH = true;
+					heros[0].isWalkH = true;
+					heros[0].isIdelH = false;
+					if (heros[0].isRunH) heros[0].isWalkH = false;
+				}
+			}
+
+			if (e.KeyCode == Keys.Space)
+			{
+				if (heros[0].isRat)
+				{
+					if (heros[0].isLeftR)
+					{
+						heros[0].isRunRL = true;
+						heros[0].isWalkR = false;
+					}
+					else
+					{
+						heros[0].isRunR = true;
+						heros[0].isWalkR = false;
+					}
+				}
+				else
+				{
+					heros[0].isRunH = true;
+				}
+			}
+
+			// ── RAT JUMP (Up arrow) ─────────────────────────────────────────────
+			if (e.KeyCode == Keys.Up && heros[0].isRat)
+			{
+				hero h = heros[0];
+				// Only allow jumping when on the ground and not already transitioning
+				if (!h.isJumping && !h.isTjump)
+				{
+					h.isTjump = true;
+					h.tjumpFrame = 0;
+					h.tjumpDelay = 0;
+				}
+			}
+
+			if (e.KeyCode == Keys.F)
+			{
+				if (!heros[0].isRat && !heros[0].isAttkH)
+				{
+					heros[0].isAttkH = true;
+					heros[0].attkFH = 0;
+				}
+			}
+		}
+
+		private void Form1_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (heros[0].isRat)
+			{
+				if (e.KeyCode == Keys.Right)
+				{
+					heros[0].isWalkR = false;
+					heros[0].isRunR = false;
+					heros[0].isRightR = false;
+				}
+				if (e.KeyCode == Keys.Left)
+				{
+					heros[0].isWalkR = false;
+					heros[0].isWalkRL = false;
+					heros[0].isRunRL = false;
+					heros[0].isLeftR = false;
+				}
+				if (e.KeyCode == Keys.Space)
+				{
+					heros[0].isRunR = false;
+					heros[0].isRunRL = false;
+					if (heros[0].isRightR || heros[0].isLeftR)
+						heros[0].isWalkR = true;
+				}
+			}
+			else
+			{
+				if (e.KeyCode == Keys.Right)
+				{
+					heros[0].isWalkH = false;
+					heros[0].isRightH = false;
+				}
+				if (e.KeyCode == Keys.Left)
+				{
+					heros[0].isWalkH = false;
+					heros[0].isLeftH = false;
+				}
+				if (e.KeyCode == Keys.Space)
+				{
+					heros[0].isRunH = false;
+					if (heros[0].isRightH || heros[0].isLeftH)
+						heros[0].isWalkH = true;
+				}
+			}
+		}
+
+		private void Form1_Paint(object sender, PaintEventArgs e)
+		{
+			drawDb(CreateGraphics());
+		}
+
+		void drawDb(Graphics g)
+		{
+			Graphics g2 = Graphics.FromImage(off);
+			drawScene(g2);
+			g.DrawImage(off, 0, 0);
+		}
+
+		void DrawSharp(Graphics g, Bitmap bmp, int x, int y, int w, int h)
+		{
+			g.InterpolationMode = InterpolationMode.NearestNeighbor;
+			g.PixelOffsetMode = PixelOffsetMode.Half;
+			g.SmoothingMode = SmoothingMode.None;
+			g.DrawImage(bmp, x, y, w, h);
+		}
+
+		void drawScene(Graphics g2)
+		{
+			g2.Clear(Color.Black);
+
+			for (int i = 0; i < grounds.Count; i++)
+			{
+				ground ptrv = grounds[i];
+				Pen pn = new Pen(Color.BlueViolet, 5);
+				g2.DrawRectangle(pn, ptrv.x, ptrv.y, ptrv.w, ptrv.h);
+			}
+
+			for (int i = 0; i < heros.Count; i++)
+			{
+				hero ptrv = heros[i];
+				if (ptrv.isRat)
+				{
+					if (ptrv.isTjump)
+					{
+						DrawSharp(g2, ptrv.jumpIRL[ptrv.tjumpFrame], ptrv.xr, ptrv.yr, 100, 100);
+					}
+					else if (ptrv.isJumping)
+					{
+						DrawSharp(g2, ptrv.jumpIRL[ptrv.jumpFRL], ptrv.xr, ptrv.yr, 100, 100);
+					}
+					else if (ptrv.isRightR)
+					{
+						if (ptrv.isRunR)
+							DrawSharp(g2, ptrv.runIR[ptrv.runFR], ptrv.xr, ptrv.yr, 100, 100);
+						else if (ptrv.isWalkR)
+							DrawSharp(g2, ptrv.walkIR[ptrv.walkFR], ptrv.xr, ptrv.yr, 100, 100);
+						else
+							DrawSharp(g2, ptrv.idelIR[ptrv.idelFR], ptrv.xr, ptrv.yr, 100, 100);
+					}
+					else if (ptrv.isLeftR)
+					{
+						if (ptrv.isRunRL)
+							DrawSharp(g2, ptrv.runIRL[ptrv.runFRL], ptrv.xr, ptrv.yr, 100, 100);
+						else if (ptrv.isWalkR)
+							DrawSharp(g2, ptrv.walkIRL[ptrv.walkFRL], ptrv.xr, ptrv.yr, 100, 100);
+						else
+							DrawSharp(g2, ptrv.idelIRL[ptrv.idelFRL], ptrv.xr, ptrv.yr, 100, 100);
+					}
+					else
+					{
+						if (ptrv.facingLeftR)
+							DrawSharp(g2, ptrv.idelIRL[ptrv.idelFRL], ptrv.xr, ptrv.yr, 100, 100);
+						else
+							DrawSharp(g2, ptrv.idelIR[ptrv.idelFR], ptrv.xr, ptrv.yr, 100, 100);
+					}
+				}
+				else
+				{
+					if (ptrv.isWalkH)
+						DrawSharp(g2, ptrv.walkIH[ptrv.walkFH], ptrv.xh, ptrv.yh, 150, 150);
+					else if (ptrv.isRunH)
+						DrawSharp(g2, ptrv.runIH[ptrv.runFH], ptrv.xh, ptrv.yh, 150, 150);
+					else if (ptrv.isAttkH)
+						DrawSharp(g2, ptrv.attkIH[ptrv.attkFH], ptrv.xh, ptrv.yh, 150, 150);
+					else
+						DrawSharp(g2, ptrv.idelIH[ptrv.idelFH], ptrv.xh, ptrv.yh, 150, 150);
+				}
+			}
+		}
+	}
+}
