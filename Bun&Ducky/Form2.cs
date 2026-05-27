@@ -25,7 +25,8 @@ namespace Bun_Ducky
 	{
 		//============================
 		public bool hasKey;
-		public List<Bitmap> walkImgsDuckRight;
+        public bool isDead;
+        public List<Bitmap> walkImgsDuckRight;
 		public List<Bitmap> walkImgsDuckLeft;
 
 		public List<Bitmap> idelImgsDuckRight;
@@ -216,7 +217,9 @@ namespace Bun_Ducky
 		List<frog> frogs = new List<frog>();
 		Bitmap off;
 		Timer gameTimer = new Timer();
-		int xStart = 0;
+        bool showFrogDialog = false;	
+        int score = 0;
+        int xStart = 0;
 		int yStart = 0;
 		int tilesXInc = 0;
 		int tilesYInc = 0;
@@ -954,28 +957,28 @@ namespace Bun_Ducky
 		}
 
 
-		bool duckOnLadder()
-		{
-			int duckCenterX = heros[0].xDuck + 35;
-			int duckCenterY = heros[0].yDuck + 35;
-			for (int i = 0; i < ladders.Count; i++)
-			{
-				int ladderRight = ladders[i].x + ladders[i].img.Width + 20;
-				int ladderBottom = ladders[i].y + ladders[i].img.Height;
+        bool duckOnLadder()
+        {
+            int duckCenterX = heros[0].xDuck + 35;
+            int duckCenterY = heros[0].yDuck + 35;
+            for (int i = 0; i < ladders.Count; i++)
+            {
+                int ladderCenterX = ladders[i].x + (ladders[i].img.Width / 2);
+                int ladderBottom = ladders[i].y + ladders[i].img.Height;
 
-				if (duckCenterX >= ladders[i].x && duckCenterX <= ladderRight)
-				{
-					if (duckCenterY + 10 >= ladders[i].y - 10 && duckCenterY <= ladderBottom)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
+                if (duckCenterX >= ladderCenterX - 15 && duckCenterX <= ladderCenterX + 15)
+                {
+                    if (duckCenterY + 10 >= ladders[i].y - 10 && duckCenterY <= ladderBottom)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
 
-		bool rabbitOnSewer()
+        bool rabbitOnSewer()
 		{
 			int rabbitCenterX = heros[0].xRabbit + 50;
 			int rabbitTop = heros[0].yRabbit;
@@ -1239,474 +1242,626 @@ namespace Bun_Ducky
 			}
 			return false;
 		}
-		private void GameTimer_Tick(object sender, EventArgs e)
+        private void GameTimer_Tick(object sender, EventArgs e)
+        {
+            if (heros[0].isDead)
+            {
+                drawDb(CreateGraphics());
+                return;
+            }
+
+            this.Text = "" + heros[0].yDuck + "|||" + heros[0].xDuck;
+            heros[0].canPushRight = false;
+            heros[0].canPushLeft = false;
+            int box1 = -1;
+            for (int i = 0; i < boxes.Count; i++)
+            {
+                // PUSH RIGHT
+                if (heros[0].xDuck + 70 >= boxes[i].x - 15 &&
+                    heros[0].xDuck + 70 <= boxes[i].x + 15)
+                {
+                    if (heros[0].yDuck + 70 >= boxes[i].y + 20 &&
+                        heros[0].yDuck <= boxes[i].y + 100)
+                    {
+                        heros[0].canPushRight = true;
+                        box1 = i;
+                        break;
+                    }
+                }
+
+                // PUSH LEFT
+                if (heros[0].xDuck >= boxes[i].x + 120 - 15 &&
+                    heros[0].xDuck <= boxes[i].x + 120 + 15)
+                {
+                    if (heros[0].yDuck + 70 >= boxes[i].y + 20 &&
+                        heros[0].yDuck <= boxes[i].y + 100)
+                    {
+                        heros[0].canPushLeft = true;
+                        box1 = i;
+                        break;
+                    }
+                }
+            }
+            if (heros[0].isRat)
+            {
+                // ===== RABBIT MOVEMENT =====
+                bool onSewer = rabbitOnSewer();
+
+                if (heros[0].isClimbRabbitUp)
+                {
+                    if (onSewer)
+                    {
+                        heros[0].currentClimbFrameRabbitLeft = 0;
+                        heros[0].currentIdelFrameRabbitRight = 0;
+                        heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
+                        heros[0].yRabbit -= 15;
+                    }
+                }
+                else if (heros[0].isClimbRabbitDn)
+                {
+                    if (onSewer)
+                    {
+                        heros[0].currentClimbFrameRabbitLeft = 0;
+                        heros[0].currentIdelFrameRabbitRight = 0;
+                        heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
+                        heros[0].yRabbit += 15;
+                    }
+                }
+                else if (heros[0].isWalkRabbit)
+                {
+                    if (heros[0].isRightRabbit)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentIdelFrameRabbitLeft = 0;
+                        heros[0].currentIdelFrameRabbitRight = 0;
+                        heros[0].currentWalkFrameRabbitRight = (heros[0].currentWalkFrameRabbitRight + 1) % heros[0].walkImgsRabbitRight.Count;
+                        int newRX = heros[0].xRabbit + 5;
+                        if (!rabbitCollidesWithWall(newRX))
+                            heros[0].xRabbit = newRX;
+                    }
+                    else if (heros[0].isLeftRabbit)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentRunFrameRabbitRight = 0;
+                        heros[0].currentIdelFrameRabbitLeft = 0;
+                        heros[0].currentWalkFrameRabbitLeft = (heros[0].currentWalkFrameRabbitLeft + 1) % heros[0].walkImgsRabbitLeft.Count;
+                        int newRX = heros[0].xRabbit - 5;
+                        if (!rabbitCollidesWithWall(newRX))
+                            heros[0].xRabbit = newRX;
+                    }
+                }
+                else if (heros[0].isRunRabbit)
+                {
+                    if (heros[0].isRightRabbit)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentIdelFrameRabbitRight = 0;
+                        heros[0].currentRunFrameRabbitRight = (heros[0].currentRunFrameRabbitRight + 1) % heros[0].runImgsRabbitRight.Count;
+                        int newRX = heros[0].xRabbit + 15;
+                        if (!rabbitCollidesWithWall(newRX))
+                            heros[0].xRabbit = newRX;
+                    }
+                    else if (heros[0].isLeftRabbit)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentRunFrameRabbitRight = 0;
+                        heros[0].currentIdelFrameRabbitLeft = 0;
+                        heros[0].currentRunFrameRabbitLeft = (heros[0].currentRunFrameRabbitLeft + 1) % heros[0].runImgsRabbitLeft.Count;
+                        int newRX = heros[0].xRabbit - 15;
+                        if (!rabbitCollidesWithWall(newRX))
+                            heros[0].xRabbit = newRX;
+                    }
+                    else
+                    {
+                        heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
+                    }
+                }
+                else
+                {
+                    heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
+                }
+                applyGravityRabbit();
+            }
+            else
+            {
+                // ===== DUCK MOVEMENT =====
+                bool onLadder = duckOnLadder();
+
+                if (heros[0].isClimbDuckUp)
+                {
+                    if (onLadder)
+                    {
+                        heros[0].currentIdleFrameDuckRight = 0;
+                        heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
+                        heros[0].yDuck -= 8;
+                    }
+                }
+                else if (heros[0].isClimbDuckDn)
+                {
+                    if (onLadder)
+                    {
+                        heros[0].currentIdleFrameDuckRight = 0;
+                        heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
+                        heros[0].yDuck += 8;
+                    }
+                }
+                else if (onLadder)
+                {
+                    heros[0].currentIdleFrameDuckRight = 0;
+                }
+                // ---- JUMP ----
+                else if (heros[0].isJumpDuckUp || heros[0].isJumpDuckRight || heros[0].isJumpDuckLeft)
+                {
+                    if (heros[0].isJumpDuckRight)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
+                        int newX = heros[0].xDuck + 5;
+                        if (!duckCollidesWithWall(newX))
+                            heros[0].xDuck = newX;
+                    }
+                    else if (heros[0].isJumpDuckLeft)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentJumpFrameDuckLeft = (heros[0].currentJumpFrameDuckLeft + 1) % heros[0].jumpImgsDuckLeft.Count;
+                        int newX = heros[0].xDuck - 5;
+                        if (!duckCollidesWithWall(newX))
+                            heros[0].xDuck = newX;
+                    }
+                    else
+                    {
+                        heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
+                    }
+
+                    int oldFeetY = heros[0].yDuck + 70;
+                    heros[0].yDuck += heros[0].jumpVelocity;
+                    heros[0].jumpVelocity += 2;
+                    int newFeetY = heros[0].yDuck + 70;
+                    if (heros[0].jumpVelocity > 0)
+                    {
+                        if (snapDuckToGround(oldFeetY, newFeetY))
+                        {
+                            heros[0].isJumpDuckUp = false;
+                            heros[0].isJumpDuckRight = false;
+                            heros[0].isJumpDuckLeft = false;
+                            heros[0].jumpVelocity = 0;
+                            heros[0].fallingFrameCount = 0;
+                        }
+                    }
+                }
+                // ---- WALK / RUN / ATTACK / IDLE ----
+                else if (heros[0].isWalkDuck)
+                {
+                    if (heros[0].isRightDuck)
+                    {
+                        heros[0].currentIdleFrameDuckLeft = 0;
+
+                        if (heros[0].canPushRight)
+                        {
+                            checkWall(heros[0].isRat);
+                            heros[0].isPushDuckRight = true;
+                            heros[0].isPushDuckLeft = false;
+                            heros[0].currentWalkFramesDuckRight = 0;
+
+                            int newDuckX = heros[0].xDuck + 3;
+                            int newBoxX = boxes[box1].x + 3;
+
+                            if (!duckCollidesWithWall(newDuckX) && !boxCollidesWithWall(newBoxX, box1))
+                            {
+                                heros[0].xDuck = newDuckX;
+                                boxes[box1].x = newBoxX;
+                            }
+                        }
+                        else
+                        {
+                            checkWall(heros[0].isRat);
+                            heros[0].isPushDuckRight = false;
+                            heros[0].currentWalkFramesDuckRight =
+                                (heros[0].currentWalkFramesDuckRight + 1) % heros[0].walkImgsDuckRight.Count;
+
+                            int newX = heros[0].xDuck + 5;
+                            if (!duckCollidesWithWall(newX))
+                                heros[0].xDuck = newX;
+                        }
+                    }
+                    else if (heros[0].isLeftDuck)
+                    {
+                        heros[0].currentIdleFrameDuckRight = 0;
+
+                        if (heros[0].canPushLeft)
+                        {
+                            checkWall(heros[0].isRat);
+                            heros[0].isPushDuckLeft = true;
+                            heros[0].isPushDuckRight = false;
+                            heros[0].currentWalkFramesDuckLeft = 0;
+
+                            int newDuckX = heros[0].xDuck - 3;
+                            int newBoxX = boxes[box1].x - 3;
+
+                            if (!duckCollidesWithWall(newDuckX) && !boxCollidesWithWall(newBoxX, box1))
+                            {
+                                heros[0].xDuck = newDuckX;
+                                boxes[box1].x = newBoxX;
+                            }
+                        }
+                        else
+                        {
+                            checkWall(heros[0].isRat);
+                            heros[0].isPushDuckLeft = false;
+                            heros[0].currentWalkFramesDuckLeft =
+                                (heros[0].currentWalkFramesDuckLeft + 1) % heros[0].walkImgsDuckLeft.Count;
+
+                            int newX = heros[0].xDuck - 5;
+                            if (!duckCollidesWithWall(newX))
+                                heros[0].xDuck = newX;
+                        }
+                    }
+                }
+                else if (heros[0].isRunDuck)
+                {
+                    if (heros[0].isRightDuck)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentIdleFrameDuckRight = 0;
+                        heros[0].currentRunFrameDuckRight = (heros[0].currentRunFrameDuckRight + 1) % heros[0].runImgsDuckRight.Count;
+                        int newX = heros[0].xDuck + 15;
+                        if (!duckCollidesWithWall(newX))
+                            heros[0].xDuck = newX;
+                    }
+                    else if (heros[0].isLeftDuck)
+                    {
+                        checkWall(heros[0].isRat);
+                        heros[0].currentIdleFrameDuckLeft = 0;
+                        heros[0].currentRunFrameDuckLeft = (heros[0].currentRunFrameDuckLeft + 1) % heros[0].runImgsDuckLeft.Count;
+                        int newX = heros[0].xDuck - 15;
+                        if (!duckCollidesWithWall(newX))
+                            heros[0].xDuck = newX;
+                    }
+                    else
+                    {
+                        heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
+                    }
+                }
+                else if (heros[0].isAttkDuck)
+                {
+                    heros[0].currentIdleFrameDuckRight = 0;
+                    heros[0].currentAttkFrameDuckRight++;
+                    if (heros[0].currentAttkFrameDuckRight >= heros[0].attkImgsDuckRight.Count)
+                    {
+                        heros[0].currentAttkFrameDuckRight = 0;
+                        heros[0].isAttkDuck = false;
+                    }
+                }
+                else
+                {
+                    heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
+                }
+
+                applyGravityDuck();
+            }
+
+            if (!heros[0].isRat)
+            {
+                xStart = heros[0].xDuck - this.ClientSize.Width / 2;
+                yStart = heros[0].yDuck - this.ClientSize.Height / 2;
+            }
+            else
+            {
+                xStart = heros[0].xRabbit - this.ClientSize.Width / 2;
+                yStart = (heros[0].yRabbit + 30) - this.ClientSize.Height / 2;
+            }
+            if (xStart < 0) xStart = 0;
+            if (yStart < 0) yStart = 0;
+            int maxX = bgs[0].img.Width - this.ClientSize.Width;
+            int maxY = bgs[0].img.Height - this.ClientSize.Height;
+            if (xStart > maxX) xStart = maxX;
+            if (yStart > maxY) yStart = maxY;
+
+            // key animation
+            for (int i = 0; i < keysLvl1.Count; i++)
+            {
+                key ptrv = keysLvl1[i];
+                ptrv.currentKeyFrame = (ptrv.currentKeyFrame + 1) % ptrv.imgs.Count;
+            }
+            // key pickup
+            for (int i = keysLvl1.Count - 1; i >= 0; i--)
+            {
+                int heroX = 0;
+                int heroY = 0;
+                int heroW = 0;
+                int heroH = 0;
+                if (heros[0].isRat)
+                {
+                    heroX = heros[0].xRabbit;
+                    heroY = heros[0].yRabbit;
+                    heroW = 100;
+                    heroH = 100;
+                }
+                else
+                {
+                    heroX = heros[0].xDuck;
+                    heroY = heros[0].yDuck;
+                    heroW = 70;
+                    heroH = 70;
+                }
+
+                if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
+                {
+                    if (heroY + heroH >= keysLvl1[i].y && heroY <= keysLvl1[i].y + 30)
+                    {
+                        keysLvl1.RemoveAt(i);
+                        heros[0].hasKey = true;
+                    }
+                }
+            }
+            // chick
+            for (int i = 0; i < chicks.Count; i++)
+            {
+                chick c = chicks[i];
+                c.currentChickFrame = (c.currentChickFrame + 1) % c.imgs.Count;
+            }
+            // chick pickup
+            for (int i = chicks.Count - 1; i >= 0; i--)
+            {
+                int heroX = 0;
+                int heroY = 0;
+                int heroW = 0;
+                int heroH = 0;
+
+                if (heros[0].isRat)
+                {
+                    heroX = heros[0].xRabbit;
+                    heroY = heros[0].yRabbit;
+                    heroW = 100;
+                    heroH = 100;
+                }
+                else
+                {
+                    heroX = heros[0].xDuck;
+                    heroY = heros[0].yDuck;
+                    heroW = 70;
+                    heroH = 70;
+                }
+
+                if (heroX + heroW >= chicks[i].x && heroX <= chicks[i].x + chicks[i].imgs[0].Width)
+                {
+                    if (heroY + heroH >= chicks[i].y && heroY <= chicks[i].y + chicks[i].imgs[0].Height)
+                    {
+                        chicks.RemoveAt(i);
+                        score += 10;
+                    }
+                }
+            }
+            // water toggle
+            waterOnCt++;
+            if (waterOnCt < 20)
+            {
+                for (int i = 0; i < waters.Count; i++)
+                {
+                    waters[i].on = 1;
+                    waters[i].currentWaterFrame = (waters[i].currentWaterFrame + 1) % waters[i].imgs.Count;
+                }
+            }
+            else if (waterOnCt < 40)
+            {
+                for (int i = 0; i < waters.Count; i++)
+                    waters[i].on = 0;
+            }
+            else
+            {
+                waterOnCt = 0;
+            }
+            // frog update
+            for (int i = 0; i < frogs.Count; i++)
+            {
+                frog f = frogs[i];
+                int heroX = 0;
+                int heroY = 0;
+                if (heros[0].isRat)
+                {
+                    heroX = heros[0].xRabbit;
+                    heroY = heros[0].yRabbit;
+                }
+                else
+                {
+                    heroX = heros[0].xDuck;
+                    heroY = heros[0].yDuck;
+                }
+
+                if (f.isIdle)
+                {
+                    f.currentIdleFrameFrog = (f.currentIdleFrameFrog + 1) % f.IdleImgsFrog.Count;
+                    if (heroX > f.x - 300 && heroX < f.x + 300)
+                    {
+                        f.isIdle = false;
+                        f.isHopToHero = true;
+                    }
+                }
+                else if (f.isHopToHero)
+                {
+                    if (f.x - heroX < 80 && f.x - heroX > -80)
+                    {
+                        f.isHopToHero = false;
+                        f.isAttacking = true;
+                        f.currentAttkFrameFrog = 0;
+                    }
+                    else if (f.x - heroX > 300 || f.x - heroX < -300)
+                    {
+                        f.isHopToHero = false;
+                        f.isHopBack = true;
+                    }
+                    else
+                    {
+                        f.currentHopFrameFrogLeft = (f.currentHopFrameFrogLeft + 1) % f.hopImgsFrogLeft.Count;
+                        if (heroX < f.x)
+                            f.x -= 3;
+                        else
+                            f.x += 3;
+                    }
+                }
+                else if (f.isAttacking)
+                {
+                    f.currentAttkFrameFrog++;
+                    if (f.currentAttkFrameFrog >= f.attkImgsFrog.Count)
+                    {
+                        f.currentAttkFrameFrog = 0;
+                        if (f.x - heroX > 80 || f.x - heroX < -80)
+                        {
+                            f.isAttacking = false;
+                            f.isHopBack = true;
+                        }
+                    }
+                }
+                else if (f.isHopBack)
+                {
+                    f.currentHopFrameFrogRigt = (f.currentHopFrameFrogRigt + 1) % f.hopImgsFrogRight.Count;
+                    if (f.x < f.startX)
+                    {
+                        f.x += 3;
+                    }
+                    else
+                    {
+                        f.isHopBack = false;
+                        f.isIdle = true;
+                        f.currentIdleFrameFrog = 0;
+                    }
+                }
+            }
+            // water death check
+            for (int i = 0; i < waters.Count; i++)
+            {
+                if (waters[i].on == 1)
+                {
+                    int heroX = 0;
+                    int heroY = 0;
+                    int heroW = 0;
+                    int heroH = 0;
+
+                    if (heros[0].isRat)
+                    {
+                        heroX = heros[0].xRabbit;
+                        heroY = heros[0].yRabbit;
+                        heroW = 100;
+                        heroH = 100;
+                    }
+                    else
+                    {
+                        heroX = heros[0].xDuck;
+                        heroY = heros[0].yDuck;
+                        heroW = 70;
+                        heroH = 70;
+                    }
+                    int waterRight = waters[i].x + (waters[i].imgs[0].Width / 2) + 20;
+                    int waterLeft = waters[i].x + (waters[i].imgs[0].Width / 2) - 20;
+                    int waterBottom = waters[i].y + waters[i].imgs[0].Height - 190;
+
+                    if (heroX + heroW >= waterLeft && heroX <= waterRight)
+                    {
+                        if (heroY + heroH >= waters[i].y && heroY <= waterBottom)
+                        {
+                            heros[0].isDead = true;
+                        }
+                    }
+                }
+            }
+
+            drawDb(CreateGraphics());
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			this.Text = "" + heros[0].yDuck + "|||" + heros[0].xDuck;
-			heros[0].canPushRight = false;
-			heros[0].canPushLeft = false;
-			int box1 = -1;
-			for (int i = 0; i < boxes.Count; i++)
-			{
-				// PUSH RIGHT
-				if (heros[0].xDuck + 70 >= boxes[i].x - 15 &&
-					heros[0].xDuck + 70 <= boxes[i].x + 15)
-				{
-					if (heros[0].yDuck + 70 >= boxes[i].y + 20 &&
-						heros[0].yDuck <= boxes[i].y + 100)
-					{
-						heros[0].canPushRight = true;
-						box1 = i;
-						break;
-					}
-				}
+            if (e.KeyCode == Keys.G)
+            {
+                int heroX = 0;
+                int heroY = 0;
 
-				// PUSH LEFT
-				if (heros[0].xDuck >= boxes[i].x + 120 - 15 &&
-					heros[0].xDuck <= boxes[i].x + 120 + 15)
-				{
-					if (heros[0].yDuck + 70 >= boxes[i].y + 20 &&
-						heros[0].yDuck <= boxes[i].y + 100)
-					{
-						heros[0].canPushLeft = true;
-						box1 = i;
-						break;
-					}
-				}
-			}
-			if (heros[0].isRat)
-			{
-				// ===== RABBIT MOVEMENT =====
-				bool onSewer = rabbitOnSewer();
+                if (heros[0].isRat)
+                {
+                    heroX = heros[0].xRabbit;
+                    heroY = heros[0].yRabbit;
+                }
+                else
+                {
+                    heroX = heros[0].xDuck;
+                    heroY = heros[0].yDuck;
+                }
 
-				if (heros[0].isClimbRabbitUp)
-				{
+                for (int i = 0; i < frogs.Count; i++)
+                {
+                    if (heroX + 70 >= frogs[i].x - 100 && heroX <= frogs[i].x + 100)
+                    {
+                        if (heroY + 70 >= frogs[i].y - 100 && heroY <= frogs[i].y + 100)
+                        {
+                            if (showFrogDialog)
+                            {
+                                showFrogDialog = false;
+                            }
+                            else
+                            {
+                                showFrogDialog = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            if (e.KeyCode == Keys.R)
+            {
+                if (heros[0].isDead)
+                {
+                    // reset position
+                    score = 0;
+                    heros[0].xDuck = 650;
+                    heros[0].yDuck = 950;
+                    heros[0].xRabbit = 650;
+                    heros[0].yRabbit = 920;
+                    heros[0].isRat = false;
+                    heros[0].isDead = false;
 
-					if (onSewer)
-					{
-						heros[0].currentClimbFrameRabbitLeft = 0;
-						heros[0].currentIdelFrameRabbitRight = 0;
-						heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
-						heros[0].yRabbit -= 15;
-					}
-				}
-				else if (heros[0].isClimbRabbitDn)
-				{
-					if (onSewer)
-					{
-						heros[0].currentClimbFrameRabbitLeft = 0;
-						heros[0].currentIdelFrameRabbitRight = 0;
-						heros[0].currentClimbFrameRabbitRight = (heros[0].currentClimbFrameRabbitRight + 1) % heros[0].climbImgsRabbitRight.Count;
-						heros[0].yRabbit += 15;
-					}
-				}
-				else if (heros[0].isWalkRabbit)
-				{
-					if (heros[0].isRightRabbit)
-					{
-						checkWall(heros[0].isRat);
-						heros[0].currentIdelFrameRabbitLeft = 0;
-						heros[0].currentIdelFrameRabbitRight = 0;
-						heros[0].currentWalkFrameRabbitRight = (heros[0].currentWalkFrameRabbitRight + 1) % heros[0].walkImgsRabbitRight.Count;
-						int newRX = heros[0].xRabbit + 5;
-						if (!rabbitCollidesWithWall(newRX))
-							heros[0].xRabbit = newRX;
-					}
-					else if (heros[0].isLeftRabbit)
-					{
-						checkWall(heros[0].isRat);
-						heros[0].currentRunFrameRabbitRight = 0;
-						heros[0].currentIdelFrameRabbitLeft = 0;
-						heros[0].currentWalkFrameRabbitLeft = (heros[0].currentWalkFrameRabbitLeft + 1) % heros[0].walkImgsRabbitLeft.Count;
-						int newRX = heros[0].xRabbit - 5;
-						if (!rabbitCollidesWithWall(newRX))
-							heros[0].xRabbit = newRX;
-					}
-				}
-				else if (heros[0].isRunRabbit)
-				{
-					if (heros[0].isRightRabbit)
-					{
-						checkWall(heros[0].isRat);
+                    // reset all movement states
+                    heros[0].isWalkDuck = false;
+                    heros[0].isRunDuck = false;
+                    heros[0].isRightDuck = false;
+                    heros[0].isLeftDuck = false;
+                    heros[0].isJumpDuckUp = false;
+                    heros[0].isJumpDuckRight = false;
+                    heros[0].isJumpDuckLeft = false;
+                    heros[0].isClimbDuckUp = false;
+                    heros[0].isClimbDuckDn = false;
+                    heros[0].jumpVelocity = 0;
+                    heros[0].fallingFrameCount = 0;
+                    heros[0].hasKey = false;
 
-						heros[0].currentIdelFrameRabbitRight = 0;
-						heros[0].currentRunFrameRabbitRight = (heros[0].currentRunFrameRabbitRight + 1) % heros[0].runImgsRabbitRight.Count;
-						int newRX = heros[0].xRabbit + 15;
-						if (!rabbitCollidesWithWall(newRX))
-							heros[0].xRabbit = newRX;
-					}
-					else if (heros[0].isLeftRabbit)
-					{
-						checkWall(heros[0].isRat);
+                    // reset key
+                    keysLvl1.Clear();
+                    key g = new key();
+                    g.x = 1725;
+                    g.y = 1360;
+                    g.imgs = new List<Bitmap>();
+                    for (int i = 0; i < 24; i++)
+                    {
+                        Bitmap b = new Bitmap("lvl1\\key\\key" + (i + 1) + ".png");
+                        g.imgs.Add(b);
+                    }
+                    keysLvl1.Add(g);
 
-						heros[0].currentRunFrameRabbitRight = 0;
-						heros[0].currentIdelFrameRabbitLeft = 0;
-						heros[0].currentRunFrameRabbitLeft = (heros[0].currentRunFrameRabbitLeft + 1) % heros[0].runImgsRabbitLeft.Count;
-						int newRX = heros[0].xRabbit - 15;
-						if (!rabbitCollidesWithWall(newRX))
-							heros[0].xRabbit = newRX;
-					}
-					else
-					{
-						heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
-					}
-				}
-				else
-				{
-					heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
-				}
-				applyGravityRabbit();
-			}
-			else
-			{
-				// ===== DUCK MOVEMENT =====
-				bool onLadder = duckOnLadder();
+                    // reset door
+                    doors.Clear();
+                    door d = new door();
+                    d.img = new Bitmap("lvl1\\door.png");
+                    d.img.MakeTransparent();
+                    d.x = 1935;
+                    d.y = 130;
+                    doors.Add(d);
 
-				if (heros[0].isClimbDuckUp)
-				{
-
-					if (onLadder)
-					{
-						heros[0].currentIdleFrameDuckRight = 0;
-						heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
-						heros[0].yDuck -= 8;
-					}
-
-				}
-				else if (heros[0].isClimbDuckUp)
-				{
-					if (onLadder)
-					{
-						heros[0].currentIdleFrameDuckRight = 0;
-						heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
-						heros[0].yDuck -= 8;
-					}
-				}
-				else if (heros[0].isClimbDuckDn)
-				{
-					if (onLadder)
-					{
-						heros[0].currentIdleFrameDuckRight = 0;
-						heros[0].currentClimbFramesDuck = (heros[0].currentClimbFramesDuck + 1) % heros[0].climbImgsDuck.Count;
-						heros[0].yDuck += 8;
-					}
-				}
-				else if (onLadder && (heros[0].isClimbDuckUp || heros[0].isClimbDuckDn))
-				{
-					heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
-				}
-				// ---- JUMP ----
-				else if (heros[0].isJumpDuckUp || heros[0].isJumpDuckRight || heros[0].isJumpDuckLeft)
-				{
-
-					if (heros[0].isJumpDuckRight)
-					{
-						checkWall(heros[0].isRat);
-						heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
-						int newX = heros[0].xDuck + 5;
-						if (!duckCollidesWithWall(newX))
-							heros[0].xDuck = newX;
-					}
-					else if (heros[0].isJumpDuckLeft)
-					{
-						checkWall(heros[0].isRat);
-						heros[0].currentJumpFrameDuckLeft = (heros[0].currentJumpFrameDuckLeft + 1) % heros[0].jumpImgsDuckLeft.Count;
-						int newX = heros[0].xDuck - 5;
-						if (!duckCollidesWithWall(newX))
-							heros[0].xDuck = newX;
-					}
-					else
-					{
-						heros[0].currentJumpFrameDuckRight = (heros[0].currentJumpFrameDuckRight + 1) % heros[0].jumpImgsDuckRight.Count;
-					}
-
-					// move vertically by jumpVelocity
-					int oldFeetY = heros[0].yDuck + 70;
-					heros[0].yDuck += heros[0].jumpVelocity;
-					heros[0].jumpVelocity += 2;
-					int newFeetY = heros[0].yDuck + 70;
-					// check landing
-					if (heros[0].jumpVelocity > 0)
-					{
-						// only check landing when falling down (velocity positive)
-						if (snapDuckToGround(oldFeetY, newFeetY))
-						{
-							heros[0].isJumpDuckUp = false;
-							heros[0].isJumpDuckRight = false;
-							heros[0].isJumpDuckLeft = false;
-							heros[0].jumpVelocity = 0;
-							heros[0].fallingFrameCount = 0;
-						}
-					}
-				}
-				// ---- WALK / RUN / ATTACK / IDLE ----
-				else if (heros[0].isWalkDuck)
-				{
-					if (heros[0].isRightDuck)
-					{
-						heros[0].currentIdleFrameDuckLeft = 0;
-
-						if (heros[0].canPushRight)
-						{
-							checkWall(heros[0].isRat);
-							heros[0].isPushDuckRight = true;
-							heros[0].isPushDuckLeft = false;
-							heros[0].currentWalkFramesDuckRight = 0;
-
-							int newDuckX = heros[0].xDuck + 3;
-							int newBoxX = boxes[box1].x + 3;
-
-							if (!duckCollidesWithWall(newDuckX) && !boxCollidesWithWall(newBoxX, box1))
-							{
-								heros[0].xDuck = newDuckX;
-								boxes[box1].x = newBoxX;
-							}
-						}
-						else
-						{
-							checkWall(heros[0].isRat);
-							heros[0].isPushDuckRight = false;
-							heros[0].currentWalkFramesDuckRight =
-								(heros[0].currentWalkFramesDuckRight + 1) % heros[0].walkImgsDuckRight.Count;
-
-							int newX = heros[0].xDuck + 5;
-							if (!duckCollidesWithWall(newX))
-								heros[0].xDuck = newX;
-						}
-					}
-					else if (heros[0].isLeftDuck)
-					{
-						heros[0].currentIdleFrameDuckRight = 0;
-
-						if (heros[0].canPushLeft)
-						{
-							checkWall(heros[0].isRat);
-							heros[0].isPushDuckLeft = true;
-							heros[0].isPushDuckRight = false;
-							heros[0].currentWalkFramesDuckLeft = 0;
-
-							int newDuckX = heros[0].xDuck - 3;
-							int newBoxX = boxes[box1].x - 3;
-
-							if (!duckCollidesWithWall(newDuckX) && !boxCollidesWithWall(newBoxX, box1))
-							{
-								heros[0].xDuck = newDuckX;
-								boxes[box1].x = newBoxX;
-							}
-						}
-						else
-						{
-							checkWall(heros[0].isRat);
-							heros[0].isPushDuckLeft = false;
-							heros[0].currentWalkFramesDuckLeft =
-								(heros[0].currentWalkFramesDuckLeft + 1) % heros[0].walkImgsDuckLeft.Count;
-
-							int newX = heros[0].xDuck - 5;
-							if (!duckCollidesWithWall(newX))
-								heros[0].xDuck = newX;
-						}
-					}
-				}
-				else if (heros[0].isRunDuck)
-				{
-					if (heros[0].isRightDuck)
-					{
-						checkWall(heros[0].isRat);
-						heros[0].currentIdleFrameDuckRight = 0;
-						heros[0].currentRunFrameDuckRight = (heros[0].currentRunFrameDuckRight + 1) % heros[0].runImgsDuckRight.Count;
-						int newX = heros[0].xDuck + 15;
-						if (!duckCollidesWithWall(newX))
-							heros[0].xDuck = newX;
-					}
-					else if (heros[0].isLeftDuck)
-					{
-						checkWall(heros[0].isRat);
-						heros[0].currentIdleFrameDuckLeft = 0;
-						heros[0].currentRunFrameDuckLeft = (heros[0].currentRunFrameDuckLeft + 1) % heros[0].runImgsDuckLeft.Count;
-						int newX = heros[0].xDuck - 15;
-						if (!duckCollidesWithWall(newX))
-							heros[0].xDuck = newX;
-					}
-					else
-					{
-						heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
-					}
-				}
-				else if (heros[0].isAttkDuck)
-				{
-					heros[0].currentIdleFrameDuckRight = 0;
-					heros[0].currentAttkFrameDuckRight++;
-					if (heros[0].currentAttkFrameDuckRight >= heros[0].attkImgsDuckRight.Count)
-					{
-						heros[0].currentAttkFrameDuckRight = 0;
-						heros[0].isAttkDuck = false;
-					}
-				}
-				else
-				{
-					heros[0].currentIdleFrameDuckRight = (heros[0].currentIdleFrameDuckRight + 1) % heros[0].idelImgsDuckRight.Count;
-				}
-
-				// apply gravity every tick for duck (when not climbing or jumping)
-				applyGravityDuck();
-			}
-
-			if (!heros[0].isRat)
-			{
-				xStart = heros[0].xDuck - this.ClientSize.Width / 2;
-				yStart = heros[0].yDuck - this.ClientSize.Height / 2;
-			}
-			else
-			{
-				xStart = heros[0].xRabbit - this.ClientSize.Width / 2;
-				yStart = (heros[0].yRabbit + 30) - this.ClientSize.Height / 2;
-			}
-			if (xStart < 0)
-			{
-				xStart = 0;
-			}
-			if (yStart < 0)
-			{
-				yStart = 0;
-			}
-			int maxX = bgs[0].img.Width - this.ClientSize.Width;
-			int maxY = bgs[0].img.Height - this.ClientSize.Height;
-			if (xStart > maxX)
-			{
-				xStart = maxX;
-			}
-			if (yStart > maxY)
-			{
-				yStart = maxY;
-			}
-			// key pickup
-			for (int i = 0; i < keysLvl1.Count; i++)
-			{
-				key ptrv = keysLvl1[i];
-				ptrv.currentKeyFrame = (ptrv.currentKeyFrame + 1) % ptrv.imgs.Count;
-			}
-
-			for (int i = keysLvl1.Count - 1; i >= 0; i--)
-			{
-				int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-				int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-				int heroW = heros[0].isRat ? 100 : 70;
-				int heroH = heros[0].isRat ? 100 : 70;
-
-				if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
-				{
-					if (heroY + heroH >= keysLvl1[i].y && heroY <= keysLvl1[i].y + 30)
-					{
-						keysLvl1.RemoveAt(i);
-						heros[0].hasKey = true;
-					}
-				}
-			}
-			//chick
-			for (int i = 0; i < chicks.Count; i++)
-			{
-				chick c = chicks[i];
-				c.currentChickFrame = (c.currentChickFrame + 1) % c.imgs.Count;
-			}
-			// water toggle
-			waterOnCt++;
-			if (waterOnCt < 20)
-			{
-				for (int i = 0; i < waters.Count; i++)
-				{
-					waters[i].on = 1;
-					waters[i].currentWaterFrame = (waters[i].currentWaterFrame + 1) % waters[i].imgs.Count;
-				}
-			}
-			else if (waterOnCt < 40)
-			{
-				for (int i = 0; i < waters.Count; i++)
-					waters[i].on = 0;
-			}
-			else
-			{
-				waterOnCt = 0;
-			}
-			// frog update
-			for (int i = 0; i < frogs.Count; i++)
-			{
-				frog f = frogs[i];
-				int heroX = heros[0].xDuck;
-				int heroY = heros[0].yDuck;
-				if (heros[0].isRat)
-				{
-					heroX = heros[0].xRabbit;
-					heroY = heros[0].yRabbit;
-				}
-
-				if (f.isIdle)
-				{
-					f.currentIdleFrameFrog = (f.currentIdleFrameFrog + 1) % f.IdleImgsFrog.Count;
-					if (heroX > f.x - 300)
-					{
-						if (heroX < f.x + 300)
-						{
-							f.isIdle = false;
-							f.isHopToHero = true;
-						}
-					}
-				}
-				else if (f.isHopToHero)
-				{
-					if (f.x - heroX < 80 && f.x - heroX > -80)
-					{
-						f.isHopToHero = false;
-						f.isAttacking = true;
-						f.currentAttkFrameFrog = 0;
-					}
-					else if (f.x - heroX > 300 || f.x - heroX < -300)
-					{
-						f.isHopToHero = false;
-						f.isHopBack = true;
-					}
-					else
-					{
-						f.currentHopFrameFrogLeft = (f.currentHopFrameFrogLeft + 1) % f.hopImgsFrogLeft.Count;
-						if (heroX < f.x)
-							f.x -= 3;
-						else
-							f.x += 3;
-					}
-				}
-				else if (f.isAttacking)
-				{
-					f.currentAttkFrameFrog++;
-					if (f.currentAttkFrameFrog >= f.attkImgsFrog.Count)
-					{
-						f.currentAttkFrameFrog = 0;
-						if (f.x - heroX > 80 || f.x - heroX < -80)
-						{
-							f.isAttacking = false;
-							f.isHopBack = true;
-						}
-					}
-				}
-				else if (f.isHopBack)
-				{
-					f.currentHopFrameFrogRigt = (f.currentHopFrameFrogRigt + 1) % f.hopImgsFrogRight.Count;
-					if (f.x < f.startX)
-					{
-						f.x += 3;
-					}
-					else
-					{
-						f.isHopBack = false;
-						f.isIdle = true;
-						f.currentIdleFrameFrog = 0;
-					}
-				}
-			}
-
-			drawDb(CreateGraphics());
-		}
-
-		private void Form1_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.E)
+                    door d2 = new door();
+                    d2.x = 650;
+                    d2.y = 805;
+                    d2.img = new Bitmap("lvl1\\startDoor.png");
+                    doors.Add(d2);
+                }
+            }
+            if (e.KeyCode == Keys.E)
 			{
 				if (heros[0].hasKey)
 				{
@@ -2252,6 +2407,35 @@ namespace Bun_Ducky
 					g2.DrawImage(ptrv.hopImgsFrogRight[ptrv.currentHopFrameFrogRigt], ptrv.x - xStart, ptrv.y - yStart, 100, 100);
 				}
 			}
-		}
+            // dashboard
+            g2.FillRectangle(Brushes.Black, 10, 10, 160, 50);
+            g2.DrawRectangle(Pens.White, 10, 10, 160, 50);
+            g2.DrawString("Score: " + score, new Font("Arial", 16, FontStyle.Bold), Brushes.Yellow, 20, 20);
+            // dashboard
+            g2.FillRectangle(Brushes.Black, 10, 10, 220, 60);
+            g2.DrawRectangle(Pens.White, 10, 10, 220, 60);
+            g2.DrawString("Score: " + score, new Font("Arial", 16, FontStyle.Bold), Brushes.Yellow, 20, 20);
+
+            // character box
+            g2.FillRectangle(Brushes.Black, 180, 10, 50, 50);
+            g2.DrawRectangle(Pens.White, 180, 10, 50, 50);
+
+            if (heros[0].isRat)
+            {
+                g2.DrawImage(heros[0].idleImgsRabbitRight[0], 180, 10, 50, 50);
+            }
+            else
+            {
+                g2.DrawImage(heros[0].idelImgsDuckRight[0], 180, 10, 50, 50);
+            }
+            if (showFrogDialog)
+            {
+                int dialogX = this.ClientSize.Width / 2 - 150;
+                int dialogY = this.ClientSize.Height / 2 - 50;
+                g2.FillRectangle(Brushes.Black, dialogX, dialogY, 300, 60);
+                g2.DrawRectangle(Pens.White, dialogX, dialogY, 300, 60);
+                g2.DrawString("Press T to transform!", new Font("Arial", 14, FontStyle.Bold), Brushes.White, dialogX + 20, dialogY + 18);
+            }
+        }
 	}
 }
