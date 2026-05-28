@@ -38,7 +38,6 @@ namespace Bun_Ducky
 			pictureBox1.Image = Image.FromFile("mainBG.jpeg");
 			pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 		}
-
 		private void button3_Click(object sender, EventArgs e)
 		{
 			button1.Enabled = false;
@@ -66,8 +65,7 @@ namespace Bun_Ducky
 
 			StreamReader sr = new StreamReader("saves.txt");
 			int ct = 0;
-			savedGames.Clear();
-			savedGamesList.Items.Clear();
+
 			while (!sr.EndOfStream)
 			{
 				string line = sr.ReadLine();
@@ -87,7 +85,7 @@ namespace Bun_Ducky
 					save.keysCollected = Convert.ToInt16(temp[9]);   // KeysCollected
 					save.chicksCollected = Convert.ToInt16(temp[10]); // ChicksCollected
 					savedGames.Add(save);
-					savedGamesList.Items.Add($"{save.id} - Level {save.level} - Score {save.score}");
+					savedGamesList.Items.Add($"ID:{save.id} - Level {save.level} - Score {save.score}");
 
 				}
 
