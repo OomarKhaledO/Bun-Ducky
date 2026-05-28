@@ -31,6 +31,7 @@ namespace Bun_Ducky
 		List<water> waters = new List<water>();
 		List<chick> chicks = new List<chick>();
 		List<frog> frogs = new List<frog>();
+		List<stairs> stairss = new List<stairs>();
 		Bitmap off;
 		Timer gameTimer = new Timer();
 		bool showFrogDialog = false;
@@ -45,9 +46,10 @@ namespace Bun_Ducky
 		bool showChapterScreen = false;
 		string chapterText = "";
 		int chapterScreenTimer = 0;
-		const int chapterScreenDuration = 120; 
+		int chapterScreenDuration = 120; 
 		bool chapterScreenDone = false;
 		GameSave save = new GameSave();
+		int currentSaveId = -1; 
 		public Form2(GameSave save)
 		{
 			InitializeComponent();
@@ -66,11 +68,10 @@ namespace Bun_Ducky
 
 		public void LoadGame(GameSave save)
 		{
+			currentSaveId = save.id;
 			lvl = save.level;
+			LoadLevel(lvl);
 			score = save.score;
-
-
-			// THEN set the hero properties AFTER LoadLevel is done
 			heros[0].hasKey = save.hasKey;
 			heros[0].isRat = save.isRat;
 			heros[0].xDuck = save.duckX;
@@ -78,12 +79,14 @@ namespace Bun_Ducky
 			heros[0].xRabbit = save.rabbitX;
 			heros[0].yRabbit = save.rabbitY;
 
-			// Remove collected items
-
 			for (int i = 0; i < save.chicksCollected && i < chicks.Count; i++)
 			{
 				if (chicks.Count > 0)
 					chicks.RemoveAt(chicks.Count - 1);
+			}
+			if (save.hasKey)
+			{
+				keysLvl1.Clear();
 			}
 		}
 
@@ -94,6 +97,189 @@ namespace Bun_Ducky
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
+			hero pnn = new hero();
+			//   === < DUCK ===
+
+			pnn.falling = new Bitmap("hFrames\\fall\\fall.png");
+			//IDLE
+			//RIGHT
+			pnn.idelImgsDuckRight = new List<Bitmap>();
+
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\idel\\idle" + (i + 1) + ".png");
+
+				pnn.idelImgsDuckRight.Add(b);
+			}
+			//LEFT
+			pnn.idelImgsDuckLeft = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\idel\\idle" + (i + 1) + ".png");
+
+				pnn.idelImgsDuckLeft.Add(b);
+			}
+			//IDLE END
+			//WALK
+			//RIGHT
+			pnn.walkImgsDuckRight = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\walk\\Walk" + (i + 1) + ".png");
+
+				pnn.walkImgsDuckRight.Add(b);
+			}
+			//LEFT
+			pnn.walkImgsDuckLeft = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\walk\\WalkB" + (i + 1) + ".png");
+
+				pnn.walkImgsDuckLeft.Add(b);
+			}
+			//WALK END
+			//RUN
+			//RIGHT
+			pnn.runImgsDuckRight = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\run\\roll" + (i + 1) + ".png");
+
+				pnn.runImgsDuckRight.Add(b);
+			}
+			//LEFT
+			pnn.runImgsDuckLeft = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\run\\roll" + (i + 1) + ".png");
+
+				pnn.runImgsDuckLeft.Add(b);
+			}
+			//RUN END
+			//ATTACK
+			//RIGHT
+			/*
+			pnn.attkImgsDuckRight= new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\attack\\AttackB" + (i + 1) + ".png");
+				pnn.attkImgsDuckRight.Add(b);
+			}
+			//LEFT
+			pnn.attkImgsDuckLeft= new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\attack\\AttackB" + (i + 1) + ".png");
+				pnn.attkImgsDuckLeft.Add(b);
+			}
+			*/
+			//ATTACK END
+
+
+			//CLIMB
+			pnn.climbImgsDuck = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\climb\\climb" + (i + 1) + ".png");
+				pnn.climbImgsDuck.Add(b);
+			}
+			//JUMP
+			//RIGHT
+			pnn.jumpImgsDuckRight = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\jump\\jump" + (i + 1) + ".png");
+
+				pnn.jumpImgsDuckRight.Add(b);
+			}
+			//LEFT
+			pnn.jumpImgsDuckLeft = new List<Bitmap>();
+			for (int i = 0; i < 4; i++)
+			{
+				Bitmap b = new Bitmap("hFrames\\jump\\jump" + (i + 1) + ".png");
+
+				pnn.jumpImgsDuckLeft.Add(b);
+			}
+			//JUMP END
+			pnn.deathDuck = new Bitmap("hFrames\\death\\death.png");
+			pnn.hitWallDuck = new Bitmap("hFrames\\hitWall\\wall_hit.png");
+			//   === DUCK /> ===
+
+
+			// = = = = = = = = = = = = = = = = = = =
+			//   === < RABBIT ===
+			pnn.xRabbit = pnn.xDuck;
+			pnn.yRabbit = pnn.yDuck - 30;
+			//IDLE
+			//RIGHT
+			pnn.idleImgsRabbitRight = new List<Bitmap>();
+
+			for (int i = 0; i < 6; i++)
+			{
+				Bitmap b = new Bitmap("rFrames\\idel\\Idle" + (i + 1) + ".png");
+
+				pnn.idleImgsRabbitRight.Add(b);
+			}
+			//LEFT
+			pnn.idleImgsRabbitLeft = new List<Bitmap>();
+			for (int i = 0; i < 6; i++)
+			{
+				Bitmap b = new Bitmap("rFrames\\idel\\IdleB" + (i + 1) + ".png");
+
+				pnn.idleImgsRabbitLeft.Add(b);
+			}
+			//IDLE END
+			//WALK
+			//RIGHT
+			pnn.walkImgsRabbitRight = new List<Bitmap>();
+			for (int i = 0; i < 8; i++)
+			{
+				Bitmap b = new Bitmap("rFrames\\walk\\Walk" + (i + 1) + ".png");
+
+				pnn.walkImgsRabbitRight.Add(b);
+			}
+			//LEFT
+			pnn.walkImgsRabbitLeft = new List<Bitmap>();
+			for (int i = 0; i < 8; i++)
+			{
+				Bitmap b = new Bitmap("rFrames\\walk\\WalkB" + (i + 1) + ".png");
+
+				pnn.walkImgsRabbitLeft.Add(b);
+			}
+			//WALK END
+			//RUN
+			//RIGHT
+			pnn.runImgsRabbitRight = new List<Bitmap>();
+			for (int i = 0; i < 8; i++)
+			{
+				Bitmap b = new Bitmap("rFrames\\run\\Run" + (i + 1) + ".png");
+
+				pnn.runImgsRabbitRight.Add(b);
+			}
+			//LEFT
+			pnn.runImgsRabbitLeft = new List<Bitmap>();
+			for (int i = 0; i < 8; i++)
+			{
+				Bitmap b = new Bitmap("rFrames\\run\\RunB" + (i + 1) + ".png");
+
+				pnn.runImgsRabbitLeft.Add(b);
+			}
+			//RUN END
+			//CLIMB
+			pnn.climbImgsRabbitRight = new List<Bitmap>();
+			for (int i = 0; i < 3; i++)
+			{
+				Bitmap b = new Bitmap("rFrames\\climb\\climb" + (i + 1) + ".png");
+
+				pnn.climbImgsRabbitRight.Add(b);
+			}
+			//   === RABBIT /> ===
+			heros.Add(pnn);
+			LoadLevel(lvl);
+			if (save != null)
+			{
+				LoadGame(save);
+			}
 			if (lvl == 1)
 			{
 				door d = new door();
@@ -477,207 +663,173 @@ namespace Bun_Ducky
 					l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
 					tilesWLvl1.Add(l);
 				}
+				frog f = new frog();
+				f.x = 1890;
+				f.y = 1700;
+				f.startX = f.x;
+				f.IdleImgsFrog = new List<Bitmap>();
+				f.isIdle = true;
+				for (int i = 0; i < 8; i++)
+				{
+					Bitmap b = new Bitmap("lvl1\\frog\\idle\\frogIdle" + (i + 1) + ".png");
+
+					f.IdleImgsFrog.Add(b);
+				}
+				frogs.Add(f);
 
 				//===========
 				//LVL 1   END
 				//===========
 			}
-			hero pnn = new hero();
-			//   === < DUCK ===
 
-			pnn.falling = new Bitmap("hFrames\\fall\\fall.png");
-			//IDLE
-			//RIGHT
-			pnn.idelImgsDuckRight = new List<Bitmap>();
-
-			for (int i = 0; i < 4; i++)
+			//===========
+			//LVL 2 START
+			//===========
+			tilesXInc = 0;
+			if (lvl == 2)
 			{
-				Bitmap b = new Bitmap("hFrames\\idel\\idle" + (i + 1) + ".png");
-
-				pnn.idelImgsDuckRight.Add(b);
+			   for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 0 + tilesXInc;
+					t.y = 2164;
+					t.img = new Bitmap("lvl2\\tiles\\tile1.png");
+					tilesXInc += 129;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+			   for (int i = 0; i < 12; i ++)
+				{
+					ladder t = new ladder();
+					t.x = 100;
+					t.y = 950 + tilesYInc - 4;
+					t.img = new Bitmap("lvl1\\ladder.png");
+					tilesYInc += t.img.Height;
+					ladders.Add(t);
+				}
+				tilesYInc = 0;
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 0 + tilesXInc;
+					t.y = 1746 ;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 129;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+				for (int i = 0; i < 1; i++)
+				{
+					tile t = new tile();
+					t.x = 0;
+					t.y = 1250;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+				for (int i = 0; i < 4; i++)
+				{
+					tile t = new tile();
+					t.x = 265 + tilesXInc;
+					t.y = 1215;
+					t.img = new Bitmap("lvl2\\tiles\\tile3.png");
+					tilesXInc += 200;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 1175 + tilesXInc;
+					t.y = 1188;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 160;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+				for (int i = 0; i < 1; i++)
+				{
+					tile t = new tile();
+					t.x = 0 + tilesXInc;
+					t.y = 1000;
+					t.img = new Bitmap("lvl2\\tiles\\tile4.png");
+					tilesXInc += 160;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+				tilesYInc = 0;
+				for (int i = 0; i < 0; i++)
+				{
+					stairs t = new stairs();
+					t.x = 470 + (-tilesXInc);
+					t.y = 630 + tilesYInc;
+					t.img = new Bitmap("lvl2\\stairs.png");
+					tilesYInc += 80;
+					tilesXInc += 110;
+					stairss.Add(t);
+				}
+				tilesXInc = 0;
+				tilesYInc = 0;
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 1585 + tilesXInc;
+					t.y = 2010;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 160;
+					tilesLvl1.Add(t);
+				}
+				//1580y  1960
+				tilesXInc = 0;
+				tilesYInc = 0;
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 1585 + tilesXInc;
+					t.y = 1630;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 160;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+				for (int i = 0; i < 6; i++)
+				{
+					ladder t = new ladder();
+					t.x = 805;
+					t.y = 600 + tilesYInc - 4;
+					t.img = new Bitmap("lvl1\\ladder.png");
+					tilesYInc += t.img.Height - 10;
+					ladders.Add(t);
+				}
+				tilesXInc = 0;
+				tilesYInc = 0;
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 735 + tilesXInc;
+					t.y = 628;
+					t.img = new Bitmap("lvl2\\tiles\\tile5.png");
+					tilesXInc += t.img.Width;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
 			}
-			//LEFT
-			pnn.idelImgsDuckLeft = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\idel\\idle" + (i + 1) + ".png");
-
-				pnn.idelImgsDuckLeft.Add(b);
-			}
-			//IDLE END
-			//WALK
-			//RIGHT
-			pnn.walkImgsDuckRight = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\walk\\Walk" + (i + 1) + ".png");
-
-				pnn.walkImgsDuckRight.Add(b);
-			}
-			//LEFT
-			pnn.walkImgsDuckLeft = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\walk\\WalkB" + (i + 1) + ".png");
-
-				pnn.walkImgsDuckLeft.Add(b);
-			}
-			//WALK END
-			//RUN
-			//RIGHT
-			pnn.runImgsDuckRight = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\run\\roll" + (i + 1) + ".png");
-
-				pnn.runImgsDuckRight.Add(b);
-			}
-			//LEFT
-			pnn.runImgsDuckLeft = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\run\\roll" + (i + 1) + ".png");
-
-				pnn.runImgsDuckLeft.Add(b);
-			}
-			//RUN END
-			//ATTACK
-			//RIGHT
-			/*
-			pnn.attkImgsDuckRight= new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\attack\\AttackB" + (i + 1) + ".png");
-				pnn.attkImgsDuckRight.Add(b);
-			}
-			//LEFT
-			pnn.attkImgsDuckLeft= new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\attack\\AttackB" + (i + 1) + ".png");
-				pnn.attkImgsDuckLeft.Add(b);
-			}
-			*/
-			//ATTACK END
-			pnn.xDuck = 650;
-			pnn.yDuck = 950;
-			//CLIMB
-			pnn.climbImgsDuck = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\climb\\climb" + (i + 1) + ".png");
-				pnn.climbImgsDuck.Add(b);
-			}
-			//JUMP
-			//RIGHT
-			pnn.jumpImgsDuckRight = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\jump\\jump" + (i + 1) + ".png");
-
-				pnn.jumpImgsDuckRight.Add(b);
-			}
-			//LEFT
-			pnn.jumpImgsDuckLeft = new List<Bitmap>();
-			for (int i = 0; i < 4; i++)
-			{
-				Bitmap b = new Bitmap("hFrames\\jump\\jump" + (i + 1) + ".png");
-
-				pnn.jumpImgsDuckLeft.Add(b);
-			}
-			//JUMP END
-			pnn.deathDuck = new Bitmap("hFrames\\death\\death.png");
-			pnn.hitWallDuck = new Bitmap("hFrames\\hitWall\\wall_hit.png");
-			//   === DUCK /> ===
-
-
-			// = = = = = = = = = = = = = = = = = = =
-			//   === < RABBIT ===
-			pnn.xRabbit = pnn.xDuck;
-			pnn.yRabbit = pnn.yDuck - 30;
-			//IDLE
-			//RIGHT
-			pnn.idleImgsRabbitRight = new List<Bitmap>();
-
-			for (int i = 0; i < 6; i++)
-			{
-				Bitmap b = new Bitmap("rFrames\\idel\\Idle" + (i + 1) + ".png");
-
-				pnn.idleImgsRabbitRight.Add(b);
-			}
-			//LEFT
-			pnn.idleImgsRabbitLeft = new List<Bitmap>();
-			for (int i = 0; i < 6; i++)
-			{
-				Bitmap b = new Bitmap("rFrames\\idel\\IdleB" + (i + 1) + ".png");
-
-				pnn.idleImgsRabbitLeft.Add(b);
-			}
-			//IDLE END
-			//WALK
-			//RIGHT
-			pnn.walkImgsRabbitRight = new List<Bitmap>();
-			for (int i = 0; i < 8; i++)
-			{
-				Bitmap b = new Bitmap("rFrames\\walk\\Walk" + (i + 1) + ".png");
-
-				pnn.walkImgsRabbitRight.Add(b);
-			}
-			//LEFT
-			pnn.walkImgsRabbitLeft = new List<Bitmap>();
-			for (int i = 0; i < 8; i++)
-			{
-				Bitmap b = new Bitmap("rFrames\\walk\\WalkB" + (i + 1) + ".png");
-
-				pnn.walkImgsRabbitLeft.Add(b);
-			}
-			//WALK END
-			//RUN
-			//RIGHT
-			pnn.runImgsRabbitRight = new List<Bitmap>();
-			for (int i = 0; i < 8; i++)
-			{
-				Bitmap b = new Bitmap("rFrames\\run\\Run" + (i + 1) + ".png");
-
-				pnn.runImgsRabbitRight.Add(b);
-			}
-			//LEFT
-			pnn.runImgsRabbitLeft = new List<Bitmap>();
-			for (int i = 0; i < 8; i++)
-			{
-				Bitmap b = new Bitmap("rFrames\\run\\RunB" + (i + 1) + ".png");
-
-				pnn.runImgsRabbitLeft.Add(b);
-			}
-			//RUN END
-			//CLIMB
-			pnn.climbImgsRabbitRight = new List<Bitmap>();
-			for (int i = 0; i < 3; i++)
-			{
-				Bitmap b = new Bitmap("rFrames\\climb\\climb" + (i + 1) + ".png");
-
-				pnn.climbImgsRabbitRight.Add(b);
-			}
-			//   === RABBIT /> ===
-			heros.Add(pnn);
-			frog f = new frog();
-			f.x = 1890;
-			f.y = 1700;
-			f.startX = f.x;
-			f.IdleImgsFrog = new List<Bitmap>();
-			f.isIdle = true;
-			for (int i = 0; i < 8; i++)
-			{
-				Bitmap b = new Bitmap("lvl1\\frog\\idle\\frogIdle" + (i + 1) + ".png");
-
-				f.IdleImgsFrog.Add(b);
-			}
-			frogs.Add(f);
+			
+			
 			off = new Bitmap(this.ClientSize.Width, this.ClientSize.Height);
-			if (save != null)
+			
+			/*
+			 if (lvl == 1)
 			{
-				LoadGame(save);
+				pnn.xDuck = 650;
+				pnn.yDuck = 950;
 			}
+			else if (lvl == 2)
+			{
+				pnn.xDuck = 950;
+				pnn.yDuck = 950;
+			} 
+			 */
 		}
 
 
@@ -1115,53 +1267,79 @@ namespace Bun_Ducky
 
 		void LoadLevel(int newLvl)
 		{
-			// Clear all lvl1 objects
-			doors.Clear();
-			tilesLvl1.Clear();
-			tilesPLvl1.Clear();
-			tilesWLvl1.Clear();
-			ladders.Clear();
-			keysLvl1.Clear();
-			sewers.Clear();
-			boxes.Clear();
-			chains.Clear();
-			waters.Clear();
-			chicks.Clear();
-			frogs.Clear();
-			bgs.Clear();
-
-			// Reset hero position
-			heros[0].xDuck = 100;
-			heros[0].yDuck = 500;
-			heros[0].xRabbit = 100;
-			heros[0].yRabbit = 470;
-			heros[0].isRat = false;
-			heros[0].isWalkDuck = false;
-			heros[0].isRunDuck = false;
-			heros[0].isRightDuck = false;
-			heros[0].isLeftDuck = false;
-			heros[0].isJumpDuckUp = false;
-			heros[0].isJumpDuckRight = false;
-			heros[0].isJumpDuckLeft = false;
-			heros[0].isClimbDuckUp = false;
-			heros[0].isClimbDuckDn = false;
-			heros[0].jumpVelocity = 0;
-			heros[0].fallingFrameCount = 0;
-			heros[0].hasKey = false;
+			if (heros.Count > 0)
+			{
+				heros[0].isRat = false;
+				heros[0].isWalkDuck = false;
+				heros[0].isRunDuck = false;
+				heros[0].isRightDuck = false;
+				heros[0].isLeftDuck = false;
+				heros[0].isJumpDuckUp = false;
+				heros[0].isJumpDuckRight = false;
+				heros[0].isJumpDuckLeft = false;
+				heros[0].isClimbDuckUp = false;
+				heros[0].isClimbDuckDn = false;
+				heros[0].jumpVelocity = 0;
+				heros[0].fallingFrameCount = 0;
+			}
 
 			if (newLvl == 1)
 			{
+				if (heros.Count > 0 && currentSaveId == -1)
+				{
+					heros[0].xDuck = 650;
+					heros[0].yDuck = 950;
+					heros[0].xRabbit = 650;
+					heros[0].yRabbit = 920;
+					heros[0].isRat = false;
+					heros[0].isWalkDuck = false;
+					heros[0].isRunDuck = false;
+					heros[0].isRightDuck = false;
+					heros[0].isLeftDuck = false;
+					heros[0].isJumpDuckUp = false;
+					heros[0].isJumpDuckRight = false;
+					heros[0].isJumpDuckLeft = false;
+					heros[0].isClimbDuckUp = false;
+					heros[0].isClimbDuckDn = false;
+					heros[0].jumpVelocity = 0;
+					heros[0].fallingFrameCount = 0;
+					heros[0].hasKey = false;
+				}
 				bg bb = new bg();
 				bb.img = new Bitmap("bg.png");
 				bb.X = 0;
 				bb.Y = 0;
 				bgs.Add(bb);
-
+				
+				
 			}
 			else if (newLvl == 2)
 			{
+				// 795x 1700y
+				
+				if (heros.Count > 0 && currentSaveId == -1)
+				{
+					heros[0].xDuck = 780;
+					heros[0].yDuck = 1772;
+					heros[0].xRabbit = 795;
+					heros[0].yRabbit = 1670;
+					heros[0].hasKey = false;
+					doors.Clear();
+					tilesLvl1.Clear();
+					tilesPLvl1.Clear();
+					tilesWLvl1.Clear();
+					ladders.Clear();
+					keysLvl1.Clear();
+					sewers.Clear();
+					boxes.Clear();
+					chains.Clear();
+					waters.Clear();
+					chicks.Clear();
+					frogs.Clear();
+					bgs.Clear();
+				}
 				bg bb = new bg();
-				bb.img = new Bitmap("bg2.jpeg");
+				bb.img = new Bitmap("bg2.png");
 				bb.X = 0;
 				bb.Y = 0;
 				bgs.Add(bb);
@@ -1594,6 +1772,11 @@ namespace Bun_Ducky
 				}
 				int maxX = bgs[0].img.Width - this.ClientSize.Width;
 				int maxY = bgs[0].img.Height - this.ClientSize.Height;
+				if (lvl == 2)
+				{
+					maxX += 374;
+					maxY += 328;
+				}
 				if (xStart > maxX)
 				{
 					xStart = maxX;
@@ -1965,6 +2148,7 @@ namespace Bun_Ducky
 								if (i == 0)
 								{
 									lvl++;
+									currentSaveId = -1;
 									LoadLevel(lvl);
 								}
 							}
@@ -2282,7 +2466,6 @@ namespace Bun_Ducky
 				else
 				{
 					g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, ptrv.img.Width, ptrv.img.Height);
-
 				}
 			}
 			for (int i = 0; i < tilesLvl1.Count; i++)
@@ -2328,6 +2511,12 @@ namespace Bun_Ducky
 					g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, 140, 220);
 
 				}
+			}
+
+			for (int i = 0; i < stairss.Count; i++)
+			{
+				stairs ptrv = stairss[i];
+				g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, ptrv.img.Width, ptrv.img.Height);
 			}
 
 			for (int i = 0; i < heros.Count; i++)
@@ -2590,6 +2779,7 @@ namespace Bun_Ducky
 
 		private void button3_Click(object sender, EventArgs e)
 		{
+			currentSaveId = -1;
 			lvl = 1;
 			score = 0;
 			showMenu = false;
@@ -2624,49 +2814,59 @@ namespace Bun_Ducky
 
 		private void button4_Click(object sender, EventArgs e)
 		{
-			
+
 			List<GameSave> allSaves = new List<GameSave>();
 
-			if (File.Exists("saves.txt"))
+			StreamReader sr = new StreamReader("saves.txt");
+			int ct = 0;
+			while (!sr.EndOfStream)
 			{
-				StreamReader sr = new StreamReader("saves.txt");
-				int ct = 0;
-				while (!sr.EndOfStream)
+				string line = sr.ReadLine();
+				if (ct > 0)
 				{
-					string line = sr.ReadLine();
-					if (ct > 0) // Skip header
-					{
-						string[] temp = line.Split(',');
-						GameSave existingSave = new GameSave();
-						existingSave.id = Convert.ToInt16(temp[0]);
-						existingSave.level = Convert.ToInt16(temp[1]);
-						existingSave.score = Convert.ToInt16(temp[2]);
-						existingSave.hasKey = Convert.ToBoolean(temp[3]);
-						existingSave.isRat = Convert.ToBoolean(temp[4]);
-						existingSave.duckX = Convert.ToInt16(temp[5]);
-						existingSave.duckY = Convert.ToInt16(temp[6]);
-						existingSave.rabbitX = Convert.ToInt16(temp[7]);
-						existingSave.rabbitY = Convert.ToInt16(temp[8]);
-						existingSave.keysCollected = Convert.ToInt16(temp[9]);
-						existingSave.chicksCollected = Convert.ToInt16(temp[10]);
-						allSaves.Add(existingSave);
-					}
-					ct++;
+					string[] temp = line.Split(',');
+					GameSave existingSave = new GameSave();
+					existingSave.id = Convert.ToInt16(temp[0]);
+					existingSave.level = Convert.ToInt16(temp[1]);
+					existingSave.score = Convert.ToInt16(temp[2]);
+					existingSave.hasKey = Convert.ToBoolean(temp[3]);
+					existingSave.isRat = Convert.ToBoolean(temp[4]);
+					existingSave.duckX = Convert.ToInt16(temp[5]);
+					existingSave.duckY = Convert.ToInt16(temp[6]);
+					existingSave.rabbitX = Convert.ToInt16(temp[7]);
+					existingSave.rabbitY = Convert.ToInt16(temp[8]);
+					existingSave.keysCollected = Convert.ToInt16(temp[9]);
+					existingSave.chicksCollected = Convert.ToInt16(temp[10]);
+					allSaves.Add(existingSave);
 				}
-				sr.Close();
+				ct++;
 			}
-
-			// Create new save
+			sr.Close();
 			GameSave newSave = new GameSave();
-
-			// Generate new ID
-			if (allSaves.Count > 0)
+			bool isOverwrite = false;
+			if (currentSaveId != -1)
 			{
-				newSave.id = allSaves[allSaves.Count - 1].id + 1;
+				for (int i = 0; i < allSaves.Count; i++)
+				{
+					if (allSaves[i].id == currentSaveId)
+					{
+						
+						newSave = allSaves[i];
+						isOverwrite = true;
+						break;
+					}
+				}
 			}
-			else
+			if (!isOverwrite)
 			{
-				newSave.id = 1;
+				if (allSaves.Count > 0)
+				{
+					newSave.id = allSaves[allSaves.Count - 1].id + 1;
+				}
+				else
+				{
+					newSave.id = 1;
+				}
 			}
 
 			newSave.level = lvl;
@@ -2677,16 +2877,31 @@ namespace Bun_Ducky
 			newSave.duckY = heros[0].yDuck;
 			newSave.rabbitX = heros[0].xRabbit;
 			newSave.rabbitY = heros[0].yRabbit;
+
 			if (!heros[0].hasKey)
 			{
 				newSave.keysCollected = 0;
 			}
 			newSave.chicksCollected = 1 - chicks.Count;
 
-			// Add to list
-			allSaves.Add(newSave);
+			
+			if (isOverwrite)
+			{
+				for (int i = 0; i < allSaves.Count; i++)
+				{
+					if (allSaves[i].id == currentSaveId)
+					{
+						allSaves[i] = newSave; 
+						break;
+					}
+				}
+			}
+			else
+			{
+				allSaves.Add(newSave);
+				currentSaveId = newSave.id; 
+			}
 
-			// Write everything back to file (overwrite)
 			StreamWriter sw = new StreamWriter("saves.txt");
 			sw.WriteLine("ID,Level,Score,HasKey,IsRat,DuckX,DuckY,RabbitX,RabbitY,KeysCollected,ChicksCollected");
 			for (int i = 0; i < allSaves.Count; i++)
@@ -2697,9 +2912,18 @@ namespace Bun_Ducky
 			}
 			sw.Close();
 
-			MessageBox.Show($"Game Saved! (Save ID: {newSave.id})", "Save Game");
+			string message = "";
+			if (isOverwrite)
+			{
+				message = $"Game Saved! (Overwrote Save ID: {newSave.id})";
+			}
+			else
+			{
+				message = $"Game Saved! (New Save ID: {newSave.id})";
+			}
+			MessageBox.Show(message, "Save Game");
 
-			// Close the menu
+			
 			showMenu = false;
 			button1.Visible = false;
 			button1.Enabled = false;
@@ -2901,5 +3125,11 @@ namespace Bun_Ducky
 		public List<Bitmap> imgs;
 
 		public int currentChickFrame;
+	}
+	class stairs
+	{
+		public int x;
+		public int y;
+		public Bitmap img;
 	}
 }
