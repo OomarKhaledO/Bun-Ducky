@@ -16,7 +16,8 @@ namespace Bun_Ducky
 	public partial class Form2 : Form
 	{
 		int lvl = 1;
-		List<door> doors = new List<door>();
+        List<painting> paintings = new List<painting>();
+        List<door> doors = new List<door>();
 		List<bg> bgs = new List<bg>();
 		List<hero> heros = new List<hero>();
 		List<tile> tilesLvl1 = new List<tile>();
@@ -1157,6 +1158,14 @@ namespace Bun_Ducky
                     heros[0].yRabbit = 1670;
                     heros[0].hasKey = false;
                 }
+
+                painting monaliza = new painting();
+                monaliza.x = 1200;
+                monaliza.y = 280;
+                monaliza.width = 160;
+                monaliza.height = 220;
+                monaliza.img = new Bitmap("lvl2\\monaliza.png");
+                paintings.Add(monaliza);
 
                 bg bb = new bg();
                 bb.img = new Bitmap("bg2.png");
@@ -2602,8 +2611,12 @@ namespace Bun_Ducky
 					g2.DrawImage(ptrv.hopImgsFrogRight[ptrv.currentHopFrameFrogRigt], ptrv.x - xStart, ptrv.y - yStart, 100, 100);
 				}
 			}
-
-			if (!showMenu)
+            for (int i = 0; i < paintings.Count; i++)
+            {
+                painting p = paintings[i];
+                g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
+            }
+            if (!showMenu)
 			{
 				// dashboard
 				g2.FillRectangle(Brushes.Black, 10, 10, 160, 50);
@@ -3061,4 +3074,12 @@ namespace Bun_Ducky
 		public int y;
 		public Bitmap img;
 	}
+    class painting
+    {
+        public int x;
+        public int y;
+        public int width;
+        public int height;
+        public Bitmap img;
+    }
 }
