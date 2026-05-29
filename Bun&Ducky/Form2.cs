@@ -2071,7 +2071,42 @@ namespace Bun_Ducky
 			}
 			if (e.KeyCode == Keys.E)
 			{
-				if (heros[0].hasKey)
+                // paintings pickup
+                for (int i = paintings.Count - 1; i >= 0; i--)
+                {
+                    int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
+                    int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
+                    int heroW = heros[0].isRat ? 100 : 70;
+                    int heroH = heros[0].isRat ? 100 : 70;
+
+                    if (heroX + heroW >= paintings[i].x && heroX <= paintings[i].x + paintings[i].width)
+                    {
+                        if (heroY + heroH >= paintings[i].y && heroY <= paintings[i].y + paintings[i].height)
+                        {
+                            paintings.RemoveAt(i);
+                            score += 10;
+                        }
+                    }
+                }
+
+                // items pickup
+                for (int i = item.Count - 1; i >= 0; i--)
+                {
+                    int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
+                    int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
+                    int heroW = heros[0].isRat ? 100 : 70;
+                    int heroH = heros[0].isRat ? 100 : 70;
+
+                    if (heroX + heroW >= item[i].x && heroX <= item[i].x + item[i].width)
+                    {
+                        if (heroY + heroH >= item[i].y && heroY <= item[i].y + item[i].height)
+                        {
+                            item.RemoveAt(i);
+                            score += 10;
+                        }
+                    }
+                }
+                if (heros[0].hasKey)
 				{
 					int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
 					int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
