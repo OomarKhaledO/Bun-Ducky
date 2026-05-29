@@ -18,6 +18,7 @@ namespace Bun_Ducky
 		int lvl = 1;
         List<painting> paintings = new List<painting>();
         List<door> doors = new List<door>();
+		List<items> item = new List<items>();
 		List<bg> bgs = new List<bg>();
 		List<hero> heros = new List<hero>();
 		List<tile> tilesLvl1 = new List<tile>();
@@ -1166,7 +1167,13 @@ namespace Bun_Ducky
                 monaliza.height = 220;
                 monaliza.img = new Bitmap("lvl2\\monaliza.png");
                 paintings.Add(monaliza);
-
+				items itemm = new items();
+				itemm.x = 1859;
+				itemm.y = 920;
+                itemm.width = 180;
+                itemm.height = 200;
+				itemm.img = new Bitmap("lvl2\\tut.png");
+				item.Add(itemm);
                 bg bb = new bg();
                 bb.img = new Bitmap("bg2.png");
                 bb.X = 0;
@@ -1189,7 +1196,9 @@ namespace Bun_Ducky
                     ladder t = new ladder();
                     t.x = 100;
                     t.y = 950 + tilesYInc - 4;
-                    t.img = new Bitmap("lvl1\\ladder.png");
+                    t.img = new Bitmap("lvl2\\ladder.png");
+                    t.img.MakeTransparent(t.img.GetPixel(0, 0));
+
                     tilesYInc += t.img.Height;
                     ladders.Add(t);
                 }
@@ -1268,7 +1277,8 @@ namespace Bun_Ducky
                     ladder t = new ladder();
                     t.x = 805;
                     t.y = 600 + tilesYInc - 4;
-                    t.img = new Bitmap("lvl1\\ladder.png");
+                    t.img = new Bitmap("lvl2\\ladder.png");
+                    t.img.MakeTransparent(t.img.GetPixel(0, 0));
                     tilesYInc += t.img.Height - 10;
                     ladders.Add(t);
                 }
@@ -2616,6 +2626,11 @@ namespace Bun_Ducky
                 painting p = paintings[i];
                 g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
             }
+            for (int i = 0; i < item.Count; i++)
+            {
+                items p = item[i];
+                g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
+            }
             if (!showMenu)
 			{
 				// dashboard
@@ -3075,6 +3090,14 @@ namespace Bun_Ducky
 		public Bitmap img;
 	}
     class painting
+    {
+        public int x;
+        public int y;
+        public int width;
+        public int height;
+        public Bitmap img;
+    }
+    class items
     {
         public int x;
         public int y;

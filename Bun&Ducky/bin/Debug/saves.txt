@@ -2,6 +2,6 @@ ID,Level,Score,HasKey,IsRat,DuckX,DuckY,RabbitX,RabbitY,KeysCollected,ChicksColl
 1,1,10,True,False,1959,330,1965,1650,23,0
 2,2,10,False,False,795,2764,2000,1650,0,1
 3,2,0,False,False,1980,1722,2115,1650,0,1
-4,2,10,False,False,950,558,775,1115,0,1
+4,2,10,False,False,1620,1118,775,1115,0,1
 5,2,10,False,False,100,580,100,470,0,1
 6,2,10,False,False,775,5192,795,1670,0,1
