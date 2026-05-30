@@ -12,11 +12,13 @@ using static Bun_Ducky.Form1;
 
 namespace Bun_Ducky
 {
-	
+
 	public partial class Form2 : Form
 	{
 		int lvl = 1;
+		List<painting> paintings = new List<painting>();
 		List<door> doors = new List<door>();
+		List<items> item = new List<items>();
 		List<bg> bgs = new List<bg>();
 		List<hero> heros = new List<hero>();
 		List<tile> tilesLvl1 = new List<tile>();
@@ -32,6 +34,7 @@ namespace Bun_Ducky
 		List<chick> chicks = new List<chick>();
 		List<frog> frogs = new List<frog>();
 		List<stairs> stairss = new List<stairs>();
+		List<security> securities = new List<security>();
 		Bitmap off;
 		Timer gameTimer = new Timer();
 		bool showFrogDialog = false;
@@ -46,10 +49,10 @@ namespace Bun_Ducky
 		bool showChapterScreen = false;
 		string chapterText = "";
 		int chapterScreenTimer = 0;
-		int chapterScreenDuration = 120; 
+		int chapterScreenDuration = 120;
 		bool chapterScreenDone = false;
 		GameSave save = new GameSave();
-		int currentSaveId = -1; 
+		int currentSaveId = -1;
 		public Form2(GameSave save)
 		{
 			InitializeComponent();
@@ -273,6 +276,7 @@ namespace Bun_Ducky
 
 				pnn.climbImgsRabbitRight.Add(b);
 			}
+			pnn.rabbitMonalisa = new Bitmap("rFrames\\monalisa\\rabbitMonalisa.png");
 			//   === RABBIT /> ===
 			heros.Add(pnn);
 			LoadLevel(lvl);
@@ -280,544 +284,17 @@ namespace Bun_Ducky
 			{
 				LoadGame(save);
 			}
-			if (lvl == 1)
-			{
-				door d = new door();
-				d.img = new Bitmap("lvl1\\door.png");
-				d.img.MakeTransparent();
-				d.x = 1935;
-				d.y = 130;
-				doors.Add(d);
-				//======
-				//LVL 1
-				//======
-				bg bb = new bg();
-				bb.img = new Bitmap("bg.png");
-				bb.X = 0;
-				bb.Y = 0;
 
-				bgs.Add(bb);
-				showChapterScreen = true;
-				chapterText = "Chapter 1: The Sewer";
-				chapterScreenTimer = 0;
-				for (int i = 0; i < 1; i++)
-				{
-					water g = new water();
-					g.x = 100;
-					g.y = 100;
-					g.imgs = new List<Bitmap>();
-					for (int j = 0; j < 8; j++)
-					{
-						Bitmap m = new Bitmap("lvl1\\water\\W100" + (j + 1) + ".png");
-						g.imgs.Add(m);
-					}
-					waters.Add(g);
-				}
-				for (int i = 0; i < 1; i++)
-				{
-					door dd = new door();
-					dd.x = 650;
-					dd.y = 805;
-					dd.img = new Bitmap("lvl1\\startDoor.png");
-					doors.Add(dd);
-				}
-				for (int i = 0; i < 1; i++)
-				{
-					chick g = new chick();
-					g.x = 220;
-					g.y = 395;
-					g.imgs = new List<Bitmap>();
-					for (int j = 0; j < 16; j++)
-					{
-						Bitmap m = new Bitmap("lvl1\\chick\\chick" + (j + 1) + ".png");
-						g.imgs.Add(m);
-					}
-					chicks.Add(g);
-				}
-				//y1380  x1725
-				for (int i = 0; i < 1; i++)
-				{
-					key g = new key();
-					g.x = 1725;
-					g.y = 1360;
-
-					g.imgs = new List<Bitmap>();
-					for (int j = 0; j < 24; j++)
-					{
-						Bitmap m = new Bitmap("lvl1\\key\\key" + (j + 1) + ".png");
-						g.imgs.Add(m);
-					}
-					keysLvl1.Add(g);
-				}
-				for (int i = 0; i < 9; i++)
-				{
-					tile g = new tile();
-					g.x = 740 + tilesXInc;
-					g.y = 1670;
-					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(g);
-				}
-				for (int i = 0; i < 1; i++)
-				{
-					box g = new box();
-					g.x = 305;
-					g.y = 930;
-					g.img = new Bitmap("lvl1\\box.png");
-					tilesXInc += 70;
-					boxes.Add(g);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 1; i++)
-				{
-					box g = new box();
-					g.x = 930;
-					g.y = 1600;
-					g.img = new Bitmap("lvl1\\box.png");
-					tilesXInc += 70;
-					boxes.Add(g);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 14; i++)
-				{
-					tile g = new tile();
-					g.x = 0 + tilesXInc;
-					g.y = 1020;
-					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(g);
-				}
-				for (int i = 0; i < 12; i++)
-				{
-					tile g = new tile();
-					g.x = 0 + tilesXInc;
-					g.y = 1020;
-					g.img = new Bitmap("lvl1\\tiles\\tile.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(g);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 1; i++)
-				{
-					tile g = new tile();
-					g.x = 855 + tilesXInc;
-					g.y = 180;
-					g.img = new Bitmap("lvl1\\tiles\\tile02.png");
-
-					tilesLvl1.Add(g);
-				}
-				for (int i = 0; i < 2; i++)
-				{
-					ladder l = new ladder();
-					l.x = 100;
-					l.y = 660 + tilesYInc;
-					l.img = new Bitmap("lvl1\\ladder.png");
-					tilesYInc += 40;
-					ladders.Add(l);
-				}
-				tilesYInc = 0;
-				for (int i = 0; i < 2; i++)
-				{
-					ladder l = new ladder();
-					l.x = 10;
-					l.y = 400 + tilesYInc;
-					l.img = new Bitmap("lvl1\\ladder.png");
-					tilesYInc += 40;
-					ladders.Add(l);
-				}
-				tilesYInc = 0;
-				for (int i = 0; i < 3; i++)
-				{
-					ladder l = new ladder();
-					l.x = 1220;
-					l.y = 970 + tilesYInc;
-					l.img = new Bitmap("lvl1\\ladder.png");
-					tilesYInc += 200;
-					ladders.Add(l);
-				}
-
-				tilesYInc = 0;
-				for (int i = 0; i < 2; i++)
-				{
-					tile g = new tile();
-					g.x = 0 + tilesXInc;
-					g.y = 686;
-					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(g);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 5; i++)
-				{
-					tile g = new tile();
-					g.x = 300 + tilesXInc;
-					g.y = 640 + (-tilesYInc);
-					g.img = new Bitmap("lvl1\\tiles\\tilleP.png");
-					tilesXInc += 100;
-					tilesYInc += 50;
-					tilesPLvl1.Add(g);
-				}
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 1; i++)
-				{
-					chain g1 = new chain();
-					g1.x = 600 + tilesXInc;
-					g1.y = 10 + (-tilesYInc) + chainsYInc;
-					g1.img = new Bitmap("lvl1\\chain.png");
-					chainsYInc += g1.img.Height - 50;
-					chains.Add(g1);
-					chain g2 = new chain();
-					g2.x = 600 + tilesXInc;
-					g2.y = 10 + (-tilesYInc) + chainsYInc;
-					chainsYInc += g1.img.Height - 50;
-					chains.Add(g2);
-					g2.img = new Bitmap("lvl1\\chain.png");
-					chain g3 = new chain();
-					g3.x = 600 + tilesXInc;
-					g3.y = 10 + (-tilesYInc) + chainsYInc;
-					g3.img = new Bitmap("lvl1\\chain.png");
-					tilesXInc += 100;
-					tilesYInc += 50;
-					chainsYInc = 50;
-					chains.Add(g3);
-
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 20; i++)
-				{
-					tile g = new tile();
-					g.x = 740 + tilesXInc;
-					g.y = 400;
-					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(g);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 20; i++)
-				{
-					tile g = new tile();
-					g.x = 0 + tilesXInc;
-					g.y = 1060;
-					g.img = new Bitmap("lvl1\\bricks2.png");
-					tilesXInc += g.img.Width;
-
-					tilesLvl1.Add(g);
-					/*
-					tile g2 = new tile();
-					g2.x = 0 + tilesXInc;
-					g2.y = 1060 + g.img.Height;
-					g2.img = new Bitmap("lvl1\\bricks.png");
-					tilesXInc += g2.img.Width;
-
-					tilesLvl1.Add(g2);
-					*/
-				}
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 10; i++)
-				{
-					tile g = new tile();
-					g.x = 740 + tilesXInc;
-					g.y = 400;
-					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(g);
-				}
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 4; i++)
-				{
-					tile g = new tile();
-					g.x = 0 + tilesXInc;
-					g.y = 420;
-					g.img = new Bitmap("lvl1\\tiles\\tile01.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(g);
-				}
-				//375
-				//KEY ROOM S
-				tilesXInc = 0;
-				for (int i = 0; i < 5; i++)
-				{
-					tile l = new tile();
-					l.x = 1640 + tilesXInc;
-					l.y = 1400;
-					l.img = new Bitmap("lvl1\\tiles\\tile3.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(l);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 30; i++)
-				{
-					tile l = new tile();
-					l.x = 0 + tilesXInc;
-					l.y = 1260;
-					l.img = new Bitmap("lvl1\\tiles\\tile3.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(l);
-				}
-				for (int i = 0; i < 1; i++)
-				{
-					tile l = new tile();
-					l.x = 1635;
-					l.y = 1260;
-					l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
-					tilesWLvl1.Add(l);
-				}
-
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 5; i++)
-				{
-					tile l = new tile();
-					l.x = 1860;
-					l.y = 550 + tilesYInc;
-					l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
-					tilesYInc += 70;
-					tilesWLvl1.Add(l);
-				}
-				for (int i = 0; i < 4; i++)
-				{
-					tile l = new tile();
-					l.x = 1540 + tilesXInc;
-					l.y = 1680 + tilesYInc;
-					l.img = new Bitmap("lvl1\\tiles\\tilleP.png");
-					tilesXInc += 20;
-					tilesYInc += 20;
-					tilesPLvl1.Add(l);
-				}
-				//1166 1875
-				tilesXInc = 0;
-				//2190	x
-				//1394 y
-				tilesYInc = 0;
-				for (int i = 0; i < 5; i++)
-				{
-					sewer l = new sewer();
-					l.x = 2190;
-					l.y = 1320 + tilesYInc;
-					l.img = new Bitmap("lvl1\\sewer.png");
-					tilesYInc += 50;
-					sewers.Add(l);
-				}
-				tilesYInc = 0;
-				for (int i = 0; i < 3; i++)
-				{
-					sewer l = new sewer();
-					l.x = 1200;
-					l.y = 100 + tilesYInc;
-					l.img = new Bitmap("lvl1\\sewer2.png");
-					tilesYInc += 50;
-					sewers.Add(l);
-				}
-				for (int i = 0; i < 10; i++)
-				{
-					tile l = new tile();
-					l.x = 2220;
-					l.y = 1140 + tilesYInc;
-					l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
-					tilesYInc += 50;
-					tilesWLvl1.Add(l);
-				}
-				tilesYInc = 0;
-				for (int i = 0; i < 3; i++)
-				{
-					tile l = new tile();
-					l.x = 700 + tilesXInc;
-					l.y = 1730;
-					l.img = new Bitmap("lvl1\\tiles\\tile02.png");
-					tilesXInc += 5;
-					tilesWLvl1.Add(l);
-				}
-
-				tilesXInc = 0;
-				//KEY ROOM E
-				tilesXInc = 0;
-				for (int i = 0; i < 8; i++)
-				{
-					tile l = new tile();
-					l.x = 1565 + tilesXInc;
-					l.y = 1750;
-					l.img = new Bitmap("lvl1\\tiles\\tile5.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(l);
-				}
-				for (int i = 0; i < 2; i++)
-				{
-					tile l = new tile();
-					l.x = 1565 + tilesXInc;
-					l.y = 1750;
-					l.img = new Bitmap("lvl1\\tiles\\tile5-0.5.png");
-					tilesXInc += 70;
-					tilesLvl1.Add(l);
-				}
-
-				tilesXInc = 0;
-
-				for (int i = 0; i < 1; i++)
-				{
-					tile l = new tile();
-					l.x = 756;
-					l.y = 1420;
-					l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
-					tilesWLvl1.Add(l);
-				}
-				frog f = new frog();
-				f.x = 1890;
-				f.y = 1700;
-				f.startX = f.x;
-				f.IdleImgsFrog = new List<Bitmap>();
-				f.isIdle = true;
-				for (int i = 0; i < 8; i++)
-				{
-					Bitmap b = new Bitmap("lvl1\\frog\\idle\\frogIdle" + (i + 1) + ".png");
-
-					f.IdleImgsFrog.Add(b);
-				}
-				frogs.Add(f);
-
-				//===========
-				//LVL 1   END
-				//===========
-			}
 
 			//===========
 			//LVL 2 START
 			//===========
 			tilesXInc = 0;
-			if (lvl == 2)
-			{
-			   for (int i = 0; i < 8; i++)
-				{
-					tile t = new tile();
-					t.x = 0 + tilesXInc;
-					t.y = 2164;
-					t.img = new Bitmap("lvl2\\tiles\\tile1.png");
-					tilesXInc += 129;
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-			   for (int i = 0; i < 12; i ++)
-				{
-					ladder t = new ladder();
-					t.x = 100;
-					t.y = 950 + tilesYInc - 4;
-					t.img = new Bitmap("lvl1\\ladder.png");
-					tilesYInc += t.img.Height;
-					ladders.Add(t);
-				}
-				tilesYInc = 0;
-				for (int i = 0; i < 8; i++)
-				{
-					tile t = new tile();
-					t.x = 0 + tilesXInc;
-					t.y = 1746 ;
-					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
-					tilesXInc += 129;
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 1; i++)
-				{
-					tile t = new tile();
-					t.x = 0;
-					t.y = 1250;
-					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 4; i++)
-				{
-					tile t = new tile();
-					t.x = 265 + tilesXInc;
-					t.y = 1215;
-					t.img = new Bitmap("lvl2\\tiles\\tile3.png");
-					tilesXInc += 200;
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 8; i++)
-				{
-					tile t = new tile();
-					t.x = 1175 + tilesXInc;
-					t.y = 1188;
-					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
-					tilesXInc += 160;
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 1; i++)
-				{
-					tile t = new tile();
-					t.x = 0 + tilesXInc;
-					t.y = 1000;
-					t.img = new Bitmap("lvl2\\tiles\\tile4.png");
-					tilesXInc += 160;
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 0; i++)
-				{
-					stairs t = new stairs();
-					t.x = 470 + (-tilesXInc);
-					t.y = 630 + tilesYInc;
-					t.img = new Bitmap("lvl2\\stairs.png");
-					tilesYInc += 80;
-					tilesXInc += 110;
-					stairss.Add(t);
-				}
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 8; i++)
-				{
-					tile t = new tile();
-					t.x = 1585 + tilesXInc;
-					t.y = 2010;
-					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
-					tilesXInc += 160;
-					tilesLvl1.Add(t);
-				}
-				//1580y  1960
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 8; i++)
-				{
-					tile t = new tile();
-					t.x = 1585 + tilesXInc;
-					t.y = 1630;
-					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
-					tilesXInc += 160;
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-				for (int i = 0; i < 6; i++)
-				{
-					ladder t = new ladder();
-					t.x = 805;
-					t.y = 600 + tilesYInc - 4;
-					t.img = new Bitmap("lvl1\\ladder.png");
-					tilesYInc += t.img.Height - 10;
-					ladders.Add(t);
-				}
-				tilesXInc = 0;
-				tilesYInc = 0;
-				for (int i = 0; i < 8; i++)
-				{
-					tile t = new tile();
-					t.x = 735 + tilesXInc;
-					t.y = 628;
-					t.img = new Bitmap("lvl2\\tiles\\tile5.png");
-					tilesXInc += t.img.Width;
-					tilesLvl1.Add(t);
-				}
-				tilesXInc = 0;
-			}
-			
-			
+
+
+
 			off = new Bitmap(this.ClientSize.Width, this.ClientSize.Height);
-			
+
 			/*
 			 if (lvl == 1)
 			{
@@ -1050,7 +527,7 @@ namespace Bun_Ducky
 					}
 					heros[0].xDuck = heros[0].xDuck + 20;
 				}
-				
+
 			}
 
 		}
@@ -1158,9 +635,9 @@ namespace Bun_Ducky
 			int rabbitFeetY = heros[0].yRabbit + 70;
 			int rabbtiCenterX = heros[0].xRabbit + 35;
 
-			if (rabbtiCenterX  >= t.x && rabbtiCenterX <= t.x + 50)
+			if (rabbtiCenterX >= t.x && rabbtiCenterX <= t.x + 50)
 			{
-				if (rabbitFeetY  >= t.y && rabbitFeetY  <= t.y + 15)
+				if (rabbitFeetY >= t.y && rabbitFeetY <= t.y + 15)
 				{
 					return true;
 				}
@@ -1267,6 +744,25 @@ namespace Bun_Ducky
 
 		void LoadLevel(int newLvl)
 		{
+			tilesXInc = 0;
+			tilesYInc = 0;
+			chainsYInc = 0;
+
+			doors.Clear();
+			tilesLvl1.Clear();
+			tilesPLvl1.Clear();
+			tilesWLvl1.Clear();
+			ladders.Clear();
+			keysLvl1.Clear();
+			sewers.Clear();
+			boxes.Clear();
+			chains.Clear();
+			waters.Clear();
+			chicks.Clear();
+			frogs.Clear();
+			bgs.Clear();
+			stairss.Clear();
+
 			if (heros.Count > 0)
 			{
 				heros[0].isRat = false;
@@ -1281,6 +777,7 @@ namespace Bun_Ducky
 				heros[0].isClimbDuckDn = false;
 				heros[0].jumpVelocity = 0;
 				heros[0].fallingFrameCount = 0;
+				heros[0].isDead = false;
 			}
 
 			if (newLvl == 1)
@@ -1291,60 +788,552 @@ namespace Bun_Ducky
 					heros[0].yDuck = 950;
 					heros[0].xRabbit = 650;
 					heros[0].yRabbit = 920;
-					heros[0].isRat = false;
-					heros[0].isWalkDuck = false;
-					heros[0].isRunDuck = false;
-					heros[0].isRightDuck = false;
-					heros[0].isLeftDuck = false;
-					heros[0].isJumpDuckUp = false;
-					heros[0].isJumpDuckRight = false;
-					heros[0].isJumpDuckLeft = false;
-					heros[0].isClimbDuckUp = false;
-					heros[0].isClimbDuckDn = false;
-					heros[0].jumpVelocity = 0;
-					heros[0].fallingFrameCount = 0;
 					heros[0].hasKey = false;
 				}
+
 				bg bb = new bg();
 				bb.img = new Bitmap("bg.png");
 				bb.X = 0;
 				bb.Y = 0;
 				bgs.Add(bb);
-				
-				
+
+				door d = new door();
+				d.img = new Bitmap("lvl1\\door.png");
+				d.img.MakeTransparent();
+				d.x = 1935;
+				d.y = 130;
+				doors.Add(d);
+
+				door dd = new door();
+				dd.x = 650;
+				dd.y = 805;
+				dd.img = new Bitmap("lvl1\\startDoor.png");
+				doors.Add(dd);
+
+				water g0 = new water();
+				g0.x = 100;
+				g0.y = 100;
+				g0.imgs = new List<Bitmap>();
+				for (int j = 0; j < 8; j++)
+				{
+					Bitmap m = new Bitmap("lvl1\\water\\W100" + (j + 1) + ".png");
+					g0.imgs.Add(m);
+				}
+				waters.Add(g0);
+
+				chick ck = new chick();
+				ck.x = 220;
+				ck.y = 395;
+				ck.imgs = new List<Bitmap>();
+				for (int j = 0; j < 16; j++)
+				{
+					Bitmap m = new Bitmap("lvl1\\chick\\chick" + (j + 1) + ".png");
+					ck.imgs.Add(m);
+				}
+				chicks.Add(ck);
+
+				key gk = new key();
+				gk.x = 1725;
+				gk.y = 1360;
+				gk.imgs = new List<Bitmap>();
+				for (int j = 0; j < 24; j++)
+				{
+					Bitmap m = new Bitmap("lvl1\\key\\key" + (j + 1) + ".png");
+					gk.imgs.Add(m);
+				}
+				keysLvl1.Add(gk);
+
+				for (int i = 0; i < 9; i++)
+				{
+					tile g = new tile();
+					g.x = 740 + tilesXInc;
+					g.y = 1670;
+					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(g);
+				}
+
+				box bx1 = new box();
+				bx1.x = 305;
+				bx1.y = 930;
+				bx1.img = new Bitmap("lvl1\\box.png");
+				boxes.Add(bx1);
+
+				box bx2 = new box();
+				bx2.x = 930;
+				bx2.y = 1600;
+				bx2.img = new Bitmap("lvl1\\box.png");
+				boxes.Add(bx2);
+
+				tilesXInc = 0;
+				for (int i = 0; i < 14; i++)
+				{
+					tile g = new tile();
+					g.x = 0 + tilesXInc;
+					g.y = 1020;
+					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(g);
+				}
+				for (int i = 0; i < 12; i++)
+				{
+					tile g = new tile();
+					g.x = 0 + tilesXInc;
+					g.y = 1020;
+					g.img = new Bitmap("lvl1\\tiles\\tile.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(g);
+				}
+				tilesXInc = 0;
+
+				tile t02 = new tile();
+				t02.x = 855;
+				t02.y = 180;
+				t02.img = new Bitmap("lvl1\\tiles\\tile02.png");
+				tilesLvl1.Add(t02);
+
+				for (int i = 0; i < 2; i++)
+				{
+					ladder l = new ladder();
+					l.x = 100;
+					l.y = 660 + tilesYInc;
+					l.img = new Bitmap("lvl1\\ladder.png");
+					tilesYInc += 40;
+					ladders.Add(l);
+				}
+				tilesYInc = 0;
+				for (int i = 0; i < 2; i++)
+				{
+					ladder l = new ladder();
+					l.x = 10;
+					l.y = 400 + tilesYInc;
+					l.img = new Bitmap("lvl1\\ladder.png");
+					tilesYInc += 40;
+					ladders.Add(l);
+				}
+				tilesYInc = 0;
+				for (int i = 0; i < 3; i++)
+				{
+					ladder l = new ladder();
+					l.x = 1220;
+					l.y = 970 + tilesYInc;
+					l.img = new Bitmap("lvl1\\ladder.png");
+					tilesYInc += 200;
+					ladders.Add(l);
+				}
+				tilesYInc = 0;
+
+				for (int i = 0; i < 2; i++)
+				{
+					tile g = new tile();
+					g.x = 0 + tilesXInc;
+					g.y = 686;
+					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(g);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 5; i++)
+				{
+					tile g = new tile();
+					g.x = 300 + tilesXInc;
+					g.y = 640 + (-tilesYInc);
+					g.img = new Bitmap("lvl1\\tiles\\tilleP.png");
+					tilesXInc += 100;
+					tilesYInc += 50;
+					tilesPLvl1.Add(g);
+				}
+				tilesXInc = 0;
+				tilesYInc = 0;
+
+				chain g1 = new chain();
+				g1.x = 600;
+				g1.y = 10 + chainsYInc;
+				g1.img = new Bitmap("lvl1\\chain.png");
+				chainsYInc += g1.img.Height - 50;
+				chains.Add(g1);
+
+				chain g2c = new chain();
+				g2c.x = 600;
+				g2c.y = 10 + chainsYInc;
+				g2c.img = new Bitmap("lvl1\\chain.png");
+				chainsYInc += g2c.img.Height - 50;
+				chains.Add(g2c);
+
+				chain g3c = new chain();
+				g3c.x = 600;
+				g3c.y = 10 + chainsYInc;
+				g3c.img = new Bitmap("lvl1\\chain.png");
+				chains.Add(g3c);
+				chainsYInc = 50;
+
+				for (int i = 0; i < 20; i++)
+				{
+					tile g = new tile();
+					g.x = 740 + tilesXInc;
+					g.y = 400;
+					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(g);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 20; i++)
+				{
+					tile g = new tile();
+					g.x = 0 + tilesXInc;
+					g.y = 1060;
+					g.img = new Bitmap("lvl1\\bricks2.png");
+					tilesXInc += g.img.Width;
+					tilesLvl1.Add(g);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 10; i++)
+				{
+					tile g = new tile();
+					g.x = 740 + tilesXInc;
+					g.y = 400;
+					g.img = new Bitmap("lvl1\\tiles\\tile4.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(g);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 4; i++)
+				{
+					tile g = new tile();
+					g.x = 0 + tilesXInc;
+					g.y = 420;
+					g.img = new Bitmap("lvl1\\tiles\\tile01.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(g);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 5; i++)
+				{
+					tile l = new tile();
+					l.x = 1640 + tilesXInc;
+					l.y = 1400;
+					l.img = new Bitmap("lvl1\\tiles\\tile3.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(l);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 30; i++)
+				{
+					tile l = new tile();
+					l.x = 0 + tilesXInc;
+					l.y = 1260;
+					l.img = new Bitmap("lvl1\\tiles\\tile3.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(l);
+				}
+				tilesXInc = 0;
+
+				tile tw1 = new tile();
+				tw1.x = 1635;
+				tw1.y = 1260;
+				tw1.img = new Bitmap("lvl1\\tiles\\tile3U.png");
+				tilesWLvl1.Add(tw1);
+
+				for (int i = 0; i < 5; i++)
+				{
+					tile l = new tile();
+					l.x = 1860;
+					l.y = 550 + tilesYInc;
+					l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
+					tilesYInc += 70;
+					tilesWLvl1.Add(l);
+				}
+				tilesYInc = 0;
+
+				for (int i = 0; i < 4; i++)
+				{
+					tile l = new tile();
+					l.x = 1540 + tilesXInc;
+					l.y = 1680 + tilesYInc;
+					l.img = new Bitmap("lvl1\\tiles\\tilleP.png");
+					tilesXInc += 20;
+					tilesYInc += 20;
+					tilesPLvl1.Add(l);
+				}
+				tilesXInc = 0;
+				tilesYInc = 0;
+
+				for (int i = 0; i < 5; i++)
+				{
+					sewer l = new sewer();
+					l.x = 2190;
+					l.y = 1320 + tilesYInc;
+					l.img = new Bitmap("lvl1\\sewer.png");
+					tilesYInc += 50;
+					sewers.Add(l);
+				}
+				tilesYInc = 0;
+
+				for (int i = 0; i < 3; i++)
+				{
+					sewer l = new sewer();
+					l.x = 1200;
+					l.y = 100 + tilesYInc;
+					l.img = new Bitmap("lvl1\\sewer2.png");
+					tilesYInc += 50;
+					sewers.Add(l);
+				}
+				tilesYInc = 0;
+
+				for (int i = 0; i < 10; i++)
+				{
+					tile l = new tile();
+					l.x = 2220;
+					l.y = 1140 + tilesYInc;
+					l.img = new Bitmap("lvl1\\tiles\\tile3U.png");
+					tilesYInc += 50;
+					tilesWLvl1.Add(l);
+				}
+				tilesYInc = 0;
+
+				for (int i = 0; i < 3; i++)
+				{
+					tile l = new tile();
+					l.x = 700 + tilesXInc;
+					l.y = 1730;
+					l.img = new Bitmap("lvl1\\tiles\\tile02.png");
+					tilesXInc += 5;
+					tilesWLvl1.Add(l);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 8; i++)
+				{
+					tile l = new tile();
+					l.x = 1565 + tilesXInc;
+					l.y = 1750;
+					l.img = new Bitmap("lvl1\\tiles\\tile5.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(l);
+				}
+				for (int i = 0; i < 2; i++)
+				{
+					tile l = new tile();
+					l.x = 1565 + tilesXInc;
+					l.y = 1750;
+					l.img = new Bitmap("lvl1\\tiles\\tile5-0.5.png");
+					tilesXInc += 70;
+					tilesLvl1.Add(l);
+				}
+				tilesXInc = 0;
+
+				tile tw2 = new tile();
+				tw2.x = 756;
+				tw2.y = 1420;
+				tw2.img = new Bitmap("lvl1\\tiles\\tile3U.png");
+				tilesWLvl1.Add(tw2);
+
+				frog f = new frog();
+				f.x = 1890;
+				f.y = 1700;
+				f.startX = f.x;
+				f.IdleImgsFrog = new List<Bitmap>();
+				f.isIdle = true;
+				for (int i = 0; i < 8; i++)
+				{
+					Bitmap b = new Bitmap("lvl1\\frog\\idle\\frogIdle" + (i + 1) + ".png");
+					f.IdleImgsFrog.Add(b);
+				}
+				frogs.Add(f);
+
+				showChapterScreen = true;
+				chapterText = "Chapter 1: The Sewer";
+				chapterScreenTimer = 0;
 			}
 			else if (newLvl == 2)
 			{
-				// 795x 1700y
-				
 				if (heros.Count > 0 && currentSaveId == -1)
 				{
-					heros[0].xDuck = 780;
-					heros[0].yDuck = 1772;
-					heros[0].xRabbit = 795;
-					heros[0].yRabbit = 1670;
+					heros[0].xDuck = 915;
+					heros[0].yDuck = 2094;
+					heros[0].xRabbit = heros[0].xDuck;
+					heros[0].yRabbit = heros[0].yDuck - 30 ;
 					heros[0].hasKey = false;
-					doors.Clear();
-					tilesLvl1.Clear();
-					tilesPLvl1.Clear();
-					tilesWLvl1.Clear();
-					ladders.Clear();
-					keysLvl1.Clear();
-					sewers.Clear();
-					boxes.Clear();
-					chains.Clear();
-					waters.Clear();
-					chicks.Clear();
-					frogs.Clear();
-					bgs.Clear();
 				}
+
+				painting monaliza = new painting();
+				monaliza.x = 1200;
+				monaliza.y = 280;
+				monaliza.width = 160;
+				monaliza.height = 220;
+				monaliza.img = new Bitmap("lvl2\\monaliza.png");
+				paintings.Add(monaliza);
+				items itemm = new items();
+				itemm.x = 1859;
+				itemm.y = 920;
+				itemm.width = 180;
+				itemm.height = 200;
+				itemm.img = new Bitmap("lvl2\\tut2.png");
+				item.Add(itemm);
 				bg bb = new bg();
 				bb.img = new Bitmap("bg2.png");
 				bb.X = 0;
 				bb.Y = 0;
 				bgs.Add(bb);
 
-				// TODO: add lvl2 tiles, doors, enemies etc. here
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 0 + tilesXInc;
+					t.y = 2164;
+					t.img = new Bitmap("lvl2\\tiles\\tile1.png");
+					tilesXInc += 129;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 12; i++)
+				{
+					ladder t = new ladder();
+					t.x = 100;
+					t.y = 950 + tilesYInc - 4;
+					t.img = new Bitmap("lvl2\\ladder.png");
+					t.img.MakeTransparent(t.img.GetPixel(0, 0));
+
+					tilesYInc += t.img.Height;
+					ladders.Add(t);
+				}
+				tilesYInc = 0;
+
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 0 + tilesXInc;
+					t.y = 1746;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 129;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+
+				tile t1 = new tile();
+				t1.x = 0;
+				t1.y = 1250;
+				t1.img = new Bitmap("lvl2\\tiles\\tile2.png");
+				tilesLvl1.Add(t1);
+
+				tilesXInc = 0;
+				for (int i = 0; i < 4; i++)
+				{
+					tile t = new tile();
+					t.x = 265 + tilesXInc;
+					t.y = 1215;
+					t.img = new Bitmap("lvl2\\tiles\\tile3.png");
+					tilesXInc += 200;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 1175 + tilesXInc;
+					t.y = 1188;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 160;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+
+				tile t2 = new tile();
+				t2.x = 0;
+				t2.y = 1000;
+				t2.img = new Bitmap("lvl2\\tiles\\tile4.png");
+				tilesLvl1.Add(t2);
+
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 1585 + tilesXInc;
+					t.y = 2010;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 160;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 1585 + tilesXInc;
+					t.y = 1630;
+					t.img = new Bitmap("lvl2\\tiles\\tile2.png");
+					tilesXInc += 160;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+
+				for (int i = 0; i < 6; i++)
+				{
+					ladder t = new ladder();
+					t.x = 805;
+					t.y = 600 + tilesYInc - 4;
+					t.img = new Bitmap("lvl2\\ladder.png");
+					t.img.MakeTransparent(t.img.GetPixel(0, 0));
+					tilesYInc += t.img.Height - 10;
+					ladders.Add(t);
+				}
+				tilesYInc = 0;
+
+				for (int i = 0; i < 8; i++)
+				{
+					tile t = new tile();
+					t.x = 735 + tilesXInc;
+					t.y = 628;
+					t.img = new Bitmap("lvl2\\tiles\\tile5.png");
+					tilesXInc += t.img.Width;
+					tilesLvl1.Add(t);
+				}
+				tilesXInc = 0;
+				//Monlisa SEcurity
+				for (int i = 0; i < 1; i++)
+				{
+					security s = new security();
+					s.x = 2295;
+					s.y = 510;
+					s.startX = 2295;
+					s.targetX = 1200;
+					s.state = 0;
+					s.stateCt = 0;
+					s.facingLeft = true;
+					s.idleImgsSec = new List<Bitmap>();
+					s.seenCt = 0;
+					s.hmmStr = ". h";
+					s.hmmCt = 0;
+					for (int j = 0; j < 4; j++)
+					{
+						Bitmap b = new Bitmap("lvl2\\security\\idle\\idle" + (j + 1) + ".png");
+						s.idleImgsSec.Add(b);
+					}
+					s.walkImgsSecLeft = new List<Bitmap>();
+					for (int j = 0; j < 8; j++)
+					{
+						Bitmap b = new Bitmap("lvl2\\security\\walk\\walkB" + (j + 1) + ".png");
+						s.walkImgsSecLeft.Add(b);
+					}
+					s.walkImgsSecRight = new List<Bitmap>();
+					for (int j = 0; j < 8; j++)
+					{
+						Bitmap b = new Bitmap("lvl2\\security\\walk\\walk" + (j + 1) + ".png");
+						s.walkImgsSecRight.Add(b);
+					}
+					securities.Add(s);
+				}
+
+				showChapterScreen = true;
+				chapterText = "Chapter 2: The Museum";
+				chapterScreenTimer = 0;
 			}
 			else if (newLvl == 3)
 			{
@@ -1354,27 +1343,15 @@ namespace Bun_Ducky
 				bb.Y = 0;
 				bgs.Add(bb);
 
-				
-			}
-
-			// Show chapter screen
-			showChapterScreen = true;
-			chapterScreenTimer = 0;
-			if (newLvl == 1)
-			{
-				chapterText = "Chapter 1: The Sewer";
-			}
-			else if (newLvl == 2)
-			{
-				chapterText = "Chapter 2: The Museum";
-			}
-			else if (newLvl == 3)
-			{
+				showChapterScreen = true;
 				chapterText = "Chapter 3: ???";
+				chapterScreenTimer = 0;
 			}
 			else
 			{
+				showChapterScreen = true;
 				chapterText = "TO BE CONTINUED";
+				chapterScreenTimer = 0;
 			}
 		}
 		int chapterColorVal = 0;
@@ -1385,7 +1362,7 @@ namespace Bun_Ducky
 				if (showChapterScreen)
 				{
 					chapterScreenTimer++;
-					if (chapterColorVal +20  <= 255)
+					if (chapterColorVal + 20 <= 255)
 					{
 						chapterColorVal += 20;
 					}
@@ -1552,7 +1529,12 @@ namespace Bun_Ducky
 							heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
 						}
 					}
+					else if (heros[0].isRabbitMonalisa)
+					{
+
+					}
 					else
+
 					{
 						heros[0].currentIdelFrameRabbitRight = (heros[0].currentIdelFrameRabbitRight + 1) % heros[0].idleImgsRabbitRight.Count;
 					}
@@ -1772,11 +1754,13 @@ namespace Bun_Ducky
 				}
 				int maxX = bgs[0].img.Width - this.ClientSize.Width;
 				int maxY = bgs[0].img.Height - this.ClientSize.Height;
-				if (lvl == 2)
-				{
-					maxX += 374;
-					maxY += 328;
-				}
+				/*
+				   if (lvl == 2)
+			   {
+				   maxX += 374;
+				   maxY += 328;
+			   }
+				*/
 				if (xStart > maxX)
 				{
 					xStart = maxX;
@@ -1905,7 +1889,188 @@ namespace Bun_Ducky
 				{
 					frogs[0].currentIdleFrameFrog = (frogs[0].currentIdleFrameFrog + 1) % frogs[0].IdleImgsFrog.Count;
 				}
-					// frog update
+				// ===== SECURITY UPDATE =====
+				if (lvl == 2)
+				{
+					for (int i = 0; i < securities.Count; i++)
+					{
+						int heroX = 0;
+						int heroY = 0;
+
+						if (heros[0].isRat)
+						{
+							heroX = heros[0].xRabbit;
+							heroY = heros[0].yRabbit;
+						}
+						else
+						{
+							heroX = heros[0].xDuck;
+							heroY = heros[0].yDuck;
+						}
+
+						security sec = securities[i];
+
+						bool seesHero = false;
+						if (heroX >= sec.x - 200 && heroX <= sec.x + 200)
+						{
+							if (heroY >= sec.y - 100 && heroY <= sec.y + 140)
+							{
+								if (!heros[0].isRabbitMonalisa)
+								{
+									seesHero = true;
+								}
+							}
+						}
+
+						bool paintingGone = false;
+						if (paintings.Count == 0)
+						{
+							paintingGone = true;
+						}
+
+						bool isMimicking = heros[0].isRabbitMonalisa;
+
+						if (sec.state == 0)
+						{
+							sec.currentIdleFrameSec =
+								(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+
+							sec.stateCt++;
+
+							if (sec.stateCt >= 100)
+							{
+								sec.stateCt = 0;
+								sec.state = 1;
+								sec.facingLeft = true;
+							}
+						}
+						else if (sec.state == 1)
+						{
+							sec.currentWalkFrameSecLeft =
+								(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+
+							sec.x -= 10;
+
+							if (seesHero)
+							{
+								sec.stateCt = 0;
+								sec.hmmStr = ". h";
+								sec.hmmCt = 0;
+								sec.state = 4;
+								sec.facingLeft = false;
+							}
+							else if (sec.x <= sec.targetX + 30)
+							{
+								sec.stateCt = 0;
+
+								if (paintingGone && !heros[0].isRabbitMonalisa)
+								{
+									sec.paintingWasStolen = true;
+									sec.state = 4;
+									sec.facingLeft = false;
+								}
+								else
+								{
+									sec.state = 2;
+								}
+							}
+						}
+						else if (sec.state == 2)
+						{
+							sec.currentIdleFrameSec =
+								(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+
+							sec.stateCt++;
+
+							if (paintingGone && !isMimicking)
+							{
+								sec.paintingWasStolen = true;
+								sec.stateCt = 0;
+								sec.state = 4;
+								sec.facingLeft = false;
+							}
+							else if (isMimicking)
+							{
+								sec.hmmCt++;
+
+								if (sec.hmmCt >= 5)
+								{
+									sec.hmmCt = 0;
+									sec.hmmStr = sec.hmmStr + "m";
+								}
+
+								if (sec.stateCt >= 200)
+								{
+									sec.stateCt = 0;
+									sec.hmmCt = 0;
+									sec.hmmStr = ". h";
+									sec.state = 3;
+									sec.facingLeft = false;
+								}
+							}
+							else
+							{
+								if (sec.stateCt >= 180)
+								{
+									sec.stateCt = 0;
+									sec.state = 3;
+									sec.facingLeft = false;
+								}
+							}
+						}
+						else if (sec.state == 3)
+						{
+							sec.currentWalkFrameSecRight =
+								(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+
+							sec.x += 10;
+
+							if (seesHero)
+							{
+								sec.stateCt = 0;
+								sec.hmmStr = ". h";
+								sec.hmmCt = 0;
+								sec.state = 4;
+								sec.facingLeft = false;
+							}
+							else if (sec.x >= sec.startX)
+							{
+								sec.x = sec.startX;
+								sec.stateCt = 0;
+								sec.state = 0;
+								sec.facingLeft = true;
+							}
+						}
+						else if (sec.state == 4)
+						{
+							sec.currentWalkFrameSecRight =
+								(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+
+							sec.x += 15;
+
+							if (sec.x >= sec.startX + 20)
+							{
+								sec.x = sec.startX + 20;
+								sec.stateCt = 0;
+
+								if (sec.paintingWasStolen)
+								{
+									sec.state = 5;
+								}
+								else
+								{
+									sec.state = 0;
+								}
+							}
+						}
+						else if (sec.state == 5)
+						{
+							sec.currentIdleFrameSec =
+								(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+						}
+					}
+				}
+				// frog update
 				/*
 				for (int i = 0; i < frogs.Count; i++)
 				{
@@ -1993,7 +2158,7 @@ namespace Bun_Ducky
 				}
 				button2.Visible = true;
 				button2.Enabled = true;
-				
+
 				button3.Visible = true;
 				button3.Enabled = true;
 
@@ -2016,7 +2181,7 @@ namespace Bun_Ducky
 				else
 				{
 					showMenu = false;
-					
+
 					button1.Visible = false;
 					button1.Enabled = false;
 
@@ -2026,10 +2191,10 @@ namespace Bun_Ducky
 					button3.Visible = false;
 					button3.Enabled = false;
 
-					
+
 					button4.Visible = false;
 					button4.Enabled = false;
-					
+
 				}
 			}
 			if (e.KeyCode == Keys.G)
@@ -2121,13 +2286,48 @@ namespace Bun_Ducky
 					d2.y = 805;
 					d2.img = new Bitmap("lvl1\\startDoor.png");
 					doors.Add(d2);
-					
+
 				}
 
-				
+
 			}
 			if (e.KeyCode == Keys.E)
 			{
+				// paintings pickup
+				for (int i = paintings.Count - 1; i >= 0; i--)
+				{
+					int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
+					int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
+					int heroW = heros[0].isRat ? 100 : 70;
+					int heroH = heros[0].isRat ? 100 : 70;
+
+					if (heroX + heroW >= paintings[i].x && heroX <= paintings[i].x + paintings[i].width)
+					{
+						if (heroY + heroH >= paintings[i].y && heroY <= paintings[i].y + paintings[i].height)
+						{
+							paintings.RemoveAt(i);
+							score += 10;
+						}
+					}
+				}
+
+				// items pickup
+				for (int i = item.Count - 1; i >= 0; i--)
+				{
+					int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
+					int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
+					int heroW = heros[0].isRat ? 100 : 70;
+					int heroH = heros[0].isRat ? 100 : 70;
+
+					if (heroX + heroW >= item[i].x && heroX <= item[i].x + item[i].width)
+					{
+						if (heroY + heroH >= item[i].y && heroY <= item[i].y + item[i].height)
+						{
+							item.RemoveAt(i);
+							score += 10;
+						}
+					}
+				}
 				if (heros[0].hasKey)
 				{
 					int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
@@ -2177,6 +2377,18 @@ namespace Bun_Ducky
 					heros[0].isWalkDuck = false;
 					heros[0].isLeftDuck = false;
 					heros[0].isRightDuck = false;
+				}
+			}
+			if (e.KeyCode == Keys.J)
+			{
+				if (heros[0].isRat && paintings.Count == 0)
+				{
+					if (heros[0].xRabbit > 1200 && heros[0].xRabbit < 1200 + 160
+						&&
+						heros[0].yRabbit < 600)
+					{
+						heros[0].isRabbitMonalisa = true;
+					}
 				}
 			}
 			if (e.KeyCode == Keys.Right)
@@ -2371,6 +2583,10 @@ namespace Bun_Ducky
 				{
 					heros[0].isClimbRabbitDn = false;
 				}
+				if (e.KeyCode == Keys.J)
+				{
+					heros[0].isRabbitMonalisa = false;
+				}
 			}
 			else
 			{
@@ -2431,7 +2647,7 @@ namespace Bun_Ducky
 			g2.Clear(Color.Black);
 			for (int i = 0; i < bgs.Count; i++)
 			{
-				
+
 				bg pTrv = bgs[i];
 
 				Rectangle rcDst = new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height);
@@ -2553,6 +2769,10 @@ namespace Bun_Ducky
 					else if (ptrv.isClimbRabbitUp || ptrv.isClimbRabbitDn)
 					{
 						g2.DrawImage(ptrv.climbImgsRabbitRight[ptrv.currentClimbFrameRabbitRight], ptrv.xRabbit - xStart, ptrv.yRabbit - yStart, 100, 100);
+					}
+					else if (ptrv.isRabbitMonalisa)
+					{
+						g2.DrawImage(ptrv.rabbitMonalisa, 1200 - xStart, 280 - yStart, 160, 220);
 					}
 					else
 					{
@@ -2678,13 +2898,53 @@ namespace Bun_Ducky
 					g2.DrawImage(ptrv.hopImgsFrogRight[ptrv.currentHopFrameFrogRigt], ptrv.x - xStart, ptrv.y - yStart, 100, 100);
 				}
 			}
+			for (int i = 0; i < paintings.Count; i++)
+			{
+				painting p = paintings[i];
+				g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
+			}
+			for (int i = 0; i < item.Count; i++)
+			{
+				items p = item[i];
+				g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
+			}
+			for (int i = 0; i < securities.Count; i++)
+			{
+				security sec = securities[i];
 
+				if (sec.state == 0 || sec.state == 2 || sec.state == 5)
+				{
+					g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
+				}
+				else if (sec.state == 1)
+				{
+					g2.DrawImage(sec.walkImgsSecLeft[sec.currentWalkFrameSecLeft], sec.x - xStart, sec.y - yStart, 140, 140);
+				}
+				else if (sec.state == 3 || sec.state == 4)
+				{
+					g2.DrawImage(sec.walkImgsSecRight[sec.currentWalkFrameSecRight], sec.x - xStart, sec.y - yStart, 140, 140);
+				}
+
+				if (sec.state == 5)
+				{
+					Font fSurprised = new Font("Arial", 22, FontStyle.Bold);
+					Brush bRed = new SolidBrush(Color.Red);
+					g2.DrawString("?!", fSurprised, bRed, sec.x - xStart + 20, sec.y - yStart - 36);
+				}
+
+				if (sec.state == 2 && heros[0].isRabbitMonalisa)
+				{
+					Font fHmm = new Font("Arial", 18, FontStyle.Bold);
+					Brush bWhite = new SolidBrush(Color.White);
+					g2.DrawString(sec.hmmStr, fHmm, bWhite, sec.x - xStart + 10, sec.y - yStart - 36);
+				}
+			}
 			if (!showMenu)
 			{
 				// dashboard
 				g2.FillRectangle(Brushes.Black, 10, 10, 160, 50);
 				g2.DrawRectangle(Pens.White, 10, 10, 160, 50);
-				
+
 				// dashboard
 				g2.FillRectangle(Brushes.Black, 10, 10, 220, 60);
 				g2.DrawRectangle(Pens.White, 10, 10, 220, 60);
@@ -2710,20 +2970,20 @@ namespace Bun_Ducky
 				else
 				{
 					g2.DrawImage(heros[0].idelImgsDuckRight[0], 180, 10, 50, 50);
-				}	 
+				}
 				//inventory
 				g2.FillRectangle(Brushes.Black, 10, 80, 50, 50);
 				g2.DrawRectangle(Pens.White, 10, 80, 50, 50);
-			
+
 				if (heros[0].hasKey)
 				{
 					Bitmap k = new Bitmap("lvl1\\key.png");
-					g2.DrawImage(k,20 , 90, 30,30);
+					g2.DrawImage(k, 20, 90, 30, 30);
 				}
-				
+
 				g2.FillRectangle(Brushes.Black, 60, 80, 50, 50);
 				g2.DrawRectangle(Pens.White, 60, 80, 50, 50);
-			
+
 				if (chicks.Count == 0)
 				{
 					Bitmap k = new Bitmap("lvl1\\chick\\chick12.png");
@@ -2731,7 +2991,7 @@ namespace Bun_Ducky
 				}
 				g2.FillRectangle(Brushes.Black, 110, 80, 50, 50);
 				g2.DrawRectangle(Pens.White, 110, 80, 50, 50);
-				
+
 				g2.FillRectangle(Brushes.Black, 160, 80, 50, 50);
 				g2.DrawRectangle(Pens.White, 160, 80, 50, 50);
 				if (showFrogDialog)
@@ -2756,10 +3016,10 @@ namespace Bun_Ducky
 		{
 			button1.Visible = false;
 			button1.Enabled = false;
-			
+
 			button2.Visible = false;
 			button2.Enabled = false;
-			
+
 			button3.Visible = false;
 			button3.Enabled = false;
 
@@ -2767,7 +3027,7 @@ namespace Bun_Ducky
 			button4.Enabled = false;
 
 			showMenu = false;
-			
+
 		}
 
 		private void button2_Click(object sender, EventArgs e)
@@ -2783,17 +3043,17 @@ namespace Bun_Ducky
 			lvl = 1;
 			score = 0;
 			showMenu = false;
-			
+
 			button1.Visible = false;
 			button1.Enabled = false;
-			
+
 			button2.Visible = false;
 			button2.Enabled = false;
-			
+
 			button3.Visible = false;
 			button3.Enabled = false;
 
-			button4.Visible= false;
+			button4.Visible = false;
 			button4.Enabled = false;
 
 
@@ -2808,7 +3068,7 @@ namespace Bun_Ducky
 			heros[0].jumpVelocity = 0;
 			heros[0].fallingFrameCount = 0;
 
-			
+
 			LoadLevel(1);
 		}
 
@@ -2850,7 +3110,7 @@ namespace Bun_Ducky
 				{
 					if (allSaves[i].id == currentSaveId)
 					{
-						
+
 						newSave = allSaves[i];
 						isOverwrite = true;
 						break;
@@ -2884,14 +3144,14 @@ namespace Bun_Ducky
 			}
 			newSave.chicksCollected = 1 - chicks.Count;
 
-			
+
 			if (isOverwrite)
 			{
 				for (int i = 0; i < allSaves.Count; i++)
 				{
 					if (allSaves[i].id == currentSaveId)
 					{
-						allSaves[i] = newSave; 
+						allSaves[i] = newSave;
 						break;
 					}
 				}
@@ -2899,7 +3159,7 @@ namespace Bun_Ducky
 			else
 			{
 				allSaves.Add(newSave);
-				currentSaveId = newSave.id; 
+				currentSaveId = newSave.id;
 			}
 
 			StreamWriter sw = new StreamWriter("saves.txt");
@@ -2923,7 +3183,7 @@ namespace Bun_Ducky
 			}
 			MessageBox.Show(message, "Save Game");
 
-			
+
 			showMenu = false;
 			button1.Visible = false;
 			button1.Enabled = false;
@@ -2933,6 +3193,11 @@ namespace Bun_Ducky
 			button3.Enabled = false;
 			button4.Visible = false;
 			button4.Enabled = false;
+		}
+
+		private void Form2_Load(object sender, EventArgs e)
+		{
+
 		}
 	}
 	public class bg
@@ -3021,6 +3286,8 @@ namespace Bun_Ducky
 		public List<Bitmap> runImgsRabbitLeft;
 		public List<Bitmap> climbImgsRabbitRight;
 		public List<Bitmap> climbImgsRabbitLeft;
+		public Bitmap rabbitMonalisa;
+		public bool isRabbitMonalisa;
 
 		public int currentWalkFrameRabbitRight;
 		public int currentWalkFrameRabbitLeft;
@@ -3066,6 +3333,27 @@ namespace Bun_Ducky
 		public bool isHopToHero;
 		public bool isAttacking;
 		public bool isHopBack;
+	}
+	class security
+	{
+		public int x;
+		public int y;
+		public int startX;
+		public int targetX;
+		public int state;
+		public int stateCt;
+		public bool facingLeft;
+		public int currentIdleFrameSec;
+		public int currentWalkFrameSecLeft;
+		public int currentWalkFrameSecRight;
+		public List<Bitmap> idleImgsSec;
+		public List<Bitmap> walkImgsSecLeft;
+		public List<Bitmap> walkImgsSecRight;
+
+		public int seenCt;
+		public string hmmStr;
+		public int hmmCt;
+		public bool paintingWasStolen;
 	}
 	class tile
 	{
@@ -3130,6 +3418,22 @@ namespace Bun_Ducky
 	{
 		public int x;
 		public int y;
+		public Bitmap img;
+	}
+	class painting
+	{
+		public int x;
+		public int y;
+		public int width;
+		public int height;
+		public Bitmap img;
+	}
+	class items
+	{
+		public int x;
+		public int y;
+		public int width;
+		public int height;
 		public Bitmap img;
 	}
 }

@@ -43,15 +43,15 @@ namespace Bun_Ducky
 		{
 			button1.Enabled = false;
 			button1.Visible = false;
-			
+
 			button2.Enabled = false;
 			button2.Visible = false;
-			
+
 			savedGamesList.Visible = true;
 			savedGamesList.Enabled = true;
-			
+
 			button3.Visible = false;
-			
+
 			button4.Visible = true;
 			button4.Enabled = true;
 
@@ -95,7 +95,7 @@ namespace Bun_Ducky
 
 				ct++;
 			}
-				sr.Close();
+			sr.Close();
 			if (savedGames.Count == 0)
 			{
 				savedGamesList.Items.Add("No saved games found");
@@ -142,12 +142,12 @@ namespace Bun_Ducky
 			button1.Visible = true;
 			button2.Enabled = true;
 			button2.Visible = true;
-			button3.Enabled= true;
+			button3.Enabled = true;
 			button3.Visible = true;
-			button4.Visible = false ;
-			button4.Enabled = false ;
-			button5.Visible = false ;
-			button5.Enabled = false ;
+			button4.Visible = false;
+			button4.Enabled = false;
+			button5.Visible = false;
+			button5.Enabled = false;
 			savedGamesList.Visible = false;
 			savedGamesList.Enabled = false;
 		}
