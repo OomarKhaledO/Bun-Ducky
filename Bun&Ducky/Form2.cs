@@ -3173,14 +3173,14 @@ namespace Bun_Ducky
 
 				g2.FillRectangle(Brushes.Black, 110, 80, 50, 50);
 				g2.DrawRectangle(Pens.White, 110, 80, 50, 50);
-				if (paintings.Count == 0)
+				if (paintings.Count == 0 && lvl > 1)
 				{
 					Bitmap k = new Bitmap("lvl2\\monaliza.png");
 					g2.DrawImage(k, 120, 90, 30, 30);
 				}
 				g2.FillRectangle(Brushes.Black, 160, 80, 50, 50);
 				g2.DrawRectangle(Pens.White, 160, 80, 50, 50);
-				if (item.Count == 0)
+				if (item.Count == 0 && lvl > 1)
 				{
 					Bitmap k = new Bitmap("lvl2\\tut2.png");
 					g2.DrawImage(k, 170, 90, 30, 30);
