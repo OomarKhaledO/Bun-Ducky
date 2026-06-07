@@ -15,7 +15,12 @@ namespace Bun_Ducky
 
 	public partial class Form2 : Form
 	{
-		int lvl = 1;
+        List<bullet> bullets = new List<bullet>();
+        List<Bitmap> atkFramesRight = new List<Bitmap>();  // a1r..a5r
+        List<Bitmap> atkFramesLeft = new List<Bitmap>();  // a1l..a5l
+        bool isShootingDuck = false;
+        int shootFrameTimer = 0;
+        int lvl = 1;
 		List<elevator> elevators = new List<elevator>();
 		List<painting> paintings = new List<painting>();
 		List<door> doors = new List<door>();
@@ -88,8 +93,56 @@ namespace Bun_Ducky
 			FormClosed += Form2_FormClosed;
 
 		}
+        void FireBullet(bool single)
+        {
+            bool facingRight = false;
+            if (heros[0].isRightDuck) facingRight = true;
+            if (!heros[0].isRightDuck && !heros[0].isLeftDuck) facingRight = true;
 
-		public void LoadGame(GameSave save)
+            int bx = heros[0].xDuck;
+            if (facingRight) bx = heros[0].xDuck + 70;
+
+            int by = heros[0].yDuck + 30;
+
+            int speed = -18;
+            if (facingRight) speed = 18;
+
+            List<Bitmap> frames = atkFramesLeft;
+            if (facingRight) frames = atkFramesRight;
+
+            if (single)
+            {
+                bullet b = new bullet();
+                b.x = bx;
+                b.y = by;
+                b.dx = speed;
+                b.dy = 0;
+                b.isMulti = false;
+                b.facingRight = facingRight;
+                b.frames = frames;
+                bullets.Add(b);
+            }
+            else
+            {
+                int[] spreads = { -4, 0, 4 };
+                foreach (int spread in spreads)
+                {
+                    bullet b = new bullet();
+                    b.x = bx;
+                    b.y = by;
+                    b.dx = speed;
+                    b.dy = spread;
+                    b.isMulti = true;
+                    b.facingRight = facingRight;
+                    b.frames = frames;
+                    bullets.Add(b);
+                }
+            }
+
+            isShootingDuck = true;
+            shootFrameTimer = 10;
+        }
+        public void LoadGame(GameSave save)
 		{
 			currentSaveId = save.id;
 			lvl = save.level;
@@ -132,7 +185,7 @@ namespace Bun_Ducky
             if (lvl == 2 && heros[0].repairedElevator && elevators.Count > 0)
             {
                 elevators[0].moveDir = 1;
-                elevators[0].speed = 2;
+                elevators[0].speed = 5;
             }
             if (lvl == 2 && heros[0].stoleTut)
             {
@@ -206,10 +259,10 @@ namespace Bun_Ducky
 
 				pnn.runImgsDuckLeft.Add(b);
 			}
-			//RUN END
-			//ATTACK
-			//RIGHT
-			/*
+            //RUN END
+            //ATTACK
+            //RIGHT
+            /*
 			pnn.attkImgsDuckRight= new List<Bitmap>();
 			for (int i = 0; i < 4; i++)
 			{
@@ -224,11 +277,20 @@ namespace Bun_Ducky
 				pnn.attkImgsDuckLeft.Add(b);
 			}
 			*/
-			//ATTACK END
+            //ATTACK END
 
 
-			//CLIMB
-			pnn.climbImgsDuck = new List<Bitmap>();
+            //CLIMB
+
+            // Load attack animation frames
+            for (int i = 0; i < 5; i++)
+            {
+                Bitmap br = new Bitmap("hFrames\\attack\\a" + (i + 1) + "r.png");
+                Bitmap bl = new Bitmap("hFrames\\attack\\a" + (i + 1) + "l.png");
+                atkFramesRight.Add(br);
+                atkFramesLeft.Add(bl);
+            }
+            pnn.climbImgsDuck = new List<Bitmap>();
 			for (int i = 0; i < 4; i++)
 			{
 				Bitmap b = new Bitmap("hFrames\\climb\\climb" + (i + 1) + ".png");
@@ -895,8 +957,11 @@ namespace Bun_Ducky
 			item.Clear();
 			paintings.Clear();
 
-
-			if (heros.Count > 0)
+            bullets.Clear();
+            // Reset enemy hp when level loads
+           
+            foreach (var s in securities) s.hp = 3;
+            if (heros.Count > 0)
 			{
 				heros[0].isRat = false;
 				heros[0].isWalkDuck = false;
@@ -1306,9 +1371,9 @@ namespace Bun_Ducky
 				elevator ev = new elevator();
 				ev.img = new Bitmap("lvl2\\elevator.png");
 				ev.x = 1300;
-				ev.y = 1750;
+				ev.y = 1800;
 				ev.topY = 1240;
-				ev.bottomY = 1751;
+				ev.bottomY = 1800;
 				ev.floor = new tile();
 				ev.floor.x = ev.x;
 				ev.floor.y = ev.y + ev.img.Height - 70;
@@ -1325,8 +1390,8 @@ namespace Bun_Ducky
 					heros[0].yRabbit = heros[0].yDuck - 30;
 					heros[0].hasKey = false;
 				}
-
-				painting monaliza = new painting();
+                foreach (var s in securities) s.hp = 3;
+                painting monaliza = new painting();
 				monaliza.x = 1200;
 				monaliza.y = 280;
 				monaliza.width = 160;
@@ -2172,338 +2237,343 @@ namespace Bun_Ducky
 						frogs[i].currentIdleFrameFrog = (frogs[0].currentIdleFrameFrog + 1) % frogs[0].IdleImgsFrog.Count;
 					}
 				}
-				// ===== SECURITY UPDATE =====
-				if (lvl == 2)
-				{	
+               
+                // ===== SECURITY UPDATE =====
+                if (lvl == 2)
+				{
 					//Monalisa Security
-					for (int i = 0; i < 1; i++)
+					if (securities.Count > 0)
 					{
-						int heroX = 0;
-						int heroY = 0;
-
-						if (heros[0].isRat)
+						for (int i = 0; i < 1; i++)
 						{
-							heroX = heros[0].xRabbit;
-							heroY = heros[0].yRabbit;
-						}
-						else
-						{
-							heroX = heros[0].xDuck;
-							heroY = heros[0].yDuck;
-						}
+							int heroX = 0;
+							int heroY = 0;
 
-						security sec = securities[i];
-
-						bool seesHero = false;
-						if (heroX >= sec.x - 200 && heroX <= sec.x + 200)
-						{
-							if (heroY >= sec.y - 100 && heroY <= sec.y + 140)
+							if (heros[0].isRat)
 							{
-								if (!heros[0].isRabbitMonalisa)
-								{
-									seesHero = true;
-								}
-							}
-						}
-
-						bool paintingGone = false;
-						if (paintings.Count == 0)
-						{
-							paintingGone = true;
-						}
-
-						bool isMimicking = heros[0].isRabbitMonalisa;
-
-						if (sec.state == 0)
-						{
-							sec.currentIdleFrameSec =
-								(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
-
-							sec.stateCt++;
-
-							if (sec.stateCt >= 100)
-							{
-								sec.stateCt = 0;
-								sec.state = 1;
-								sec.facingLeft = true;
-							}
-						}
-						else if (sec.state == 1)
-						{
-							sec.currentWalkFrameSecLeft =
-								(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-
-							sec.x -= 10;
-
-							if (seesHero)
-							{
-								sec.stateCt = 0;
-								sec.hmmStr = ". h";
-								sec.hmmCt = 0;
-								sec.state = 4;
-								sec.facingLeft = false;
-							}
-							else if (sec.x <= sec.targetX + 30)
-							{
-								sec.stateCt = 0;
-
-								if (paintingGone && !heros[0].isRabbitMonalisa)
-								{
-									sec.paintingWasStolen = true;
-									sec.state = 4;
-									sec.facingLeft = false;
-								}
-								else
-								{
-									sec.state = 2;
-								}
-							}
-						}
-						else if (sec.state == 2)
-						{
-							sec.currentIdleFrameSec =
-								(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
-
-							sec.stateCt++;
-
-							if (paintingGone && !isMimicking)
-							{
-								sec.paintingWasStolen = true;
-								sec.stateCt = 0;
-								sec.state = 4;
-								sec.facingLeft = false;
-							}
-							else if (isMimicking)
-							{
-								sec.hmmCt++;
-
-								if (sec.hmmCt >= 5)
-								{
-									sec.hmmCt = 0;
-									sec.hmmStr = sec.hmmStr + "m";
-								}
-
-								if (sec.stateCt >= 200)
-								{
-									sec.stateCt = 0;
-									sec.hmmCt = 0;
-									sec.hmmStr = ". h";
-									sec.state = 3;
-									sec.facingLeft = false;
-								}
+								heroX = heros[0].xRabbit;
+								heroY = heros[0].yRabbit;
 							}
 							else
 							{
-								if (sec.stateCt >= 180)
+								heroX = heros[0].xDuck;
+								heroY = heros[0].yDuck;
+							}
+
+							security sec = securities[i];
+
+							bool seesHero = false;
+							if (heroX >= sec.x - 200 && heroX <= sec.x + 200)
+							{
+								if (heroY >= sec.y - 100 && heroY <= sec.y + 140)
 								{
-									sec.stateCt = 0;
-									sec.state = 3;
-									sec.facingLeft = false;
+									if (!heros[0].isRabbitMonalisa)
+									{
+										seesHero = true;
+									}
 								}
 							}
-						}
-						else if (sec.state == 3)
-						{
-							sec.currentWalkFrameSecRight =
-								(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
 
-							sec.x += 10;
-
-							if (seesHero)
+							bool paintingGone = false;
+							if (paintings.Count == 0)
 							{
-								sec.stateCt = 0;
-								sec.hmmStr = ". h";
-								sec.hmmCt = 0;
-								sec.state = 4;
-								sec.facingLeft = false;
+								paintingGone = true;
 							}
-							else if (sec.x >= sec.startX)
-							{
-								sec.x = sec.startX;
-								sec.stateCt = 0;
-								sec.state = 0;
-								sec.facingLeft = true;
-                                
-                            }
-						}
-						else if (sec.state == 4)
-						{
-							sec.currentWalkFrameSecRight =
-								(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
 
-							sec.x += 15;
-
-							if (sec.x >= sec.startX + 20)
-							{
-								sec.x = sec.startX + 20;
-								sec.stateCt = 0;
-
-								if (sec.paintingWasStolen)
-								{
-									sec.state = 5;
-								}
-								else
-								{
-									sec.state = 0;
-								}
-							}
-						}
-						else if (sec.state == 5)
-						{
-							sec.currentIdleFrameSec =
-								(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
-						}
-					}
-
-					// Tena Security
-					// Tena Security
-					for (int i = 0; i < 1; i++)
-					{
-						security sec = securities[1];
-
-						if (sec.state != 5)
-						{
-							// chick expired — remove it
-							if (heros[0].distract != null && heros[0].chickHoldCt == 1)
-							{
-								heros[0].distract = null;
-							}
+							bool isMimicking = heros[0].isRabbitMonalisa;
 
 							if (sec.state == 0)
 							{
-								// just idle, do nothing until chick is placed
 								sec.currentIdleFrameSec =
 									(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
 
-								if (item.Count == 0 && !heros[0].isRabbitTut)
+								sec.stateCt++;
+
+								if (sec.stateCt >= 100)
 								{
-									sec.state = 5;
+									sec.stateCt = 0;
+									sec.state = 1;
+									sec.facingLeft = true;
 								}
 							}
-							else if (sec.state == 6)
+							else if (sec.state == 1)
 							{
-								// PHASE 0: x-- until x <= 1165
-								if (sec.x > 1165 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.x -= 10;
-								}
-								// PHASE 0b: y++ until y >= 1150 (step down to lower floor)
-								else if (sec.y < 1100 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.y += 5;
-									sec.x -= 10;
-								}
-								// PHASE 1: x-- until x <= 805
-								else if (sec.x > 800 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.x -= 10;
-								}
-								// PHASE 2: y++ until y >= 1680 (climb down ladder)
-								else if (sec.y < 1620 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.y += 8;
-								}
-								// PHASE 3: x-- until x <= 550
-								else if (sec.x > 550 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.x -= 8;
-								}
-								// PHASE 4: wait at chick
-								else if (sec.stateCt < 180)
-								{
-									sec.reached = true;
-									sec.currentIdleFrameSec =
-										(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
-									sec.stateCt++;
-								}
-								// RETURN PHASE 5: x++ until x >= 805
-								else if (sec.x < 800)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.facingLeft = false;
-									sec.x += 8;
-									heros[0].distract = null;
-								}
-								// RETURN PHASE 6: y-- until y <= 1150 (climb up ladder)
-								else if (sec.y > 1100)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.y -= 8;
-								}
+								sec.currentWalkFrameSecLeft =
+									(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
 
-								// RETURN PHASE 7: x++ until x >= 1165
-								else if (sec.x < 1165)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.facingLeft = false;
-									sec.x += 10;
-								}
-								else if (sec.y > 1062)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.facingLeft = false;
-									sec.y -= 5;
-									sec.x += 10;
-								}
-								// RETURN PHASE 7b: y++ until y >= 1062 (step back up to original floor)
+								sec.x -= 10;
 
-								// RETURN PHASE 8: x++ until x >= startX
-								else if (sec.x < sec.startX)
+								if (seesHero)
 								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+									sec.stateCt = 0;
+									sec.hmmStr = ". h";
+									sec.hmmCt = 0;
+									sec.state = 4;
 									sec.facingLeft = false;
-									sec.x += 10;
+								}
+								else if (sec.x <= sec.targetX + 30)
+								{
+									sec.stateCt = 0;
+
+									if (paintingGone && !heros[0].isRabbitMonalisa)
+									{
+										sec.paintingWasStolen = true;
+										sec.state = 4;
+										sec.facingLeft = false;
+									}
+									else
+									{
+										sec.state = 2;
+									}
+								}
+							}
+							else if (sec.state == 2)
+							{
+								sec.currentIdleFrameSec =
+									(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+
+								sec.stateCt++;
+
+								if (paintingGone && !isMimicking)
+								{
+									sec.paintingWasStolen = true;
+									sec.stateCt = 0;
+									sec.state = 4;
+									sec.facingLeft = false;
+								}
+								else if (isMimicking)
+								{
+									sec.hmmCt++;
+
+									if (sec.hmmCt >= 5)
+									{
+										sec.hmmCt = 0;
+										sec.hmmStr = sec.hmmStr + "m";
+									}
+
+									if (sec.stateCt >= 200)
+									{
+										sec.stateCt = 0;
+										sec.hmmCt = 0;
+										sec.hmmStr = ". h";
+										sec.state = 3;
+										sec.facingLeft = false;
+									}
 								}
 								else
 								{
-									// back home
+									if (sec.stateCt >= 180)
+									{
+										sec.stateCt = 0;
+										sec.state = 3;
+										sec.facingLeft = false;
+									}
+								}
+							}
+							else if (sec.state == 3)
+							{
+								sec.currentWalkFrameSecRight =
+									(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+
+								sec.x += 10;
+
+								if (seesHero)
+								{
+									sec.stateCt = 0;
+									sec.hmmStr = ". h";
+									sec.hmmCt = 0;
+									sec.state = 4;
+									sec.facingLeft = false;
+								}
+								else if (sec.x >= sec.startX)
+								{
 									sec.x = sec.startX;
 									sec.stateCt = 0;
 									sec.state = 0;
 									sec.facingLeft = true;
 
-									if (sec.reached)
+								}
+							}
+							else if (sec.state == 4)
+							{
+								sec.currentWalkFrameSecRight =
+									(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+
+								sec.x += 15;
+
+								if (sec.x >= sec.startX + 20)
+								{
+									sec.x = sec.startX + 20;
+									sec.stateCt = 0;
+
+									if (sec.paintingWasStolen)
 									{
-										chick dc = new chick();
-										dc.imgs = new List<Bitmap>();
-										for (int j = 0; j < 16; j++)
-										{
-											dc.imgs.Add(chickImgs[j]);
-										}
-										dc.x = 0;
-										dc.y = 0;
-										heros[0].distract = dc;
-										heros[0].chickHoldCt = 0;
-										sec.reached = false;
+										sec.state = 5;
+									}
+									else
+									{
+										sec.state = 0;
+									}
+								}
+							}
+							else if (sec.state == 5)
+							{
+								sec.currentIdleFrameSec =
+									(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+							}
+						}
+					}
+					// Tena Security
+					// Tena Security
+					if (securities.Count > 1)
+					{
+						for (int i = 0; i < 1; i++)
+						{
+							security sec = securities[1];
+
+							if (sec.state != 5)
+							{
+								// chick expired — remove it
+								if (heros[0].distract != null && heros[0].chickHoldCt == 1)
+								{
+									heros[0].distract = null;
+								}
+
+								if (sec.state == 0)
+								{
+									// just idle, do nothing until chick is placed
+									sec.currentIdleFrameSec =
+										(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+
+									if (item.Count == 0 && !heros[0].isRabbitTut)
+									{
+										sec.state = 5;
+									}
+								}
+								else if (sec.state == 6)
+								{
+									// PHASE 0: x-- until x <= 1165
+									if (sec.x > 1165 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.x -= 10;
+									}
+									// PHASE 0b: y++ until y >= 1150 (step down to lower floor)
+									else if (sec.y < 1100 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.y += 5;
+										sec.x -= 10;
+									}
+									// PHASE 1: x-- until x <= 805
+									else if (sec.x > 800 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.x -= 10;
+									}
+									// PHASE 2: y++ until y >= 1680 (climb down ladder)
+									else if (sec.y < 1620 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.y += 8;
+									}
+									// PHASE 3: x-- until x <= 550
+									else if (sec.x > 550 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.x -= 8;
+									}
+									// PHASE 4: wait at chick
+									else if (sec.stateCt < 180)
+									{
+										sec.reached = true;
+										sec.currentIdleFrameSec =
+											(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+										sec.stateCt++;
+									}
+									// RETURN PHASE 5: x++ until x >= 805
+									else if (sec.x < 800)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.x += 8;
+										heros[0].distract = null;
+									}
+									// RETURN PHASE 6: y-- until y <= 1150 (climb up ladder)
+									else if (sec.y > 1100)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.y -= 8;
 									}
 
+									// RETURN PHASE 7: x++ until x >= 1165
+									else if (sec.x < 1165)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.x += 10;
+									}
+									else if (sec.y > 1062)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.y -= 5;
+										sec.x += 10;
+									}
+									// RETURN PHASE 7b: y++ until y >= 1062 (step back up to original floor)
+
+									// RETURN PHASE 8: x++ until x >= startX
+									else if (sec.x < sec.startX)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.x += 10;
+									}
+									else
+									{
+										// back home
+										sec.x = sec.startX;
+										sec.stateCt = 0;
+										sec.state = 0;
+										sec.facingLeft = true;
+
+										if (sec.reached)
+										{
+											chick dc = new chick();
+											dc.imgs = new List<Bitmap>();
+											for (int j = 0; j < 16; j++)
+											{
+												dc.imgs.Add(chickImgs[j]);
+											}
+											dc.x = 0;
+											dc.y = 0;
+											heros[0].distract = dc;
+											heros[0].chickHoldCt = 0;
+											sec.reached = false;
+										}
+
+									}
 								}
 							}
 						}
 					}
-
 				}
-				// frog update
-				/*
+                // frog update
+                /*
 				for (int i = 0; i < frogs.Count; i++)
 				{
 					frog f = frogs[i];
@@ -2578,8 +2648,57 @@ namespace Bun_Ducky
 					}
 				}
 				*/
+                if (lvl == 2)
+                {
+                    for (int i = bullets.Count - 1; i >= 0; i--)
+                    {
+                        bullet b = bullets[i];
+                        b.x += b.dx;
+                        b.y += b.dy;
+                        b.currentFrame = (b.currentFrame + 1) % b.frames.Count;
 
-				drawDb(CreateGraphics());
+                        bool offScreen = false;
+                        if (b.x < xStart - 100) offScreen = true;
+                        if (b.x > xStart + this.ClientSize.Width + 100) offScreen = true;
+                        if (b.y < yStart - 100) offScreen = true;
+                        if (b.y > yStart + this.ClientSize.Height + 100) offScreen = true;
+
+                        if (offScreen)
+                        {
+                            bullets.RemoveAt(i);
+                            continue;
+                        }
+
+                        bool hit = false;
+
+                        for (int j = securities.Count - 1; j >= 0; j--)
+                        {
+                            security sec = securities[j];
+                            if (sec.state == 5) continue;
+                            if (b.x >= sec.x && b.x <= sec.x + 140
+                                && b.y >= sec.y && b.y <= sec.y + 140)
+                            {
+                                sec.hp--;
+                                hit = true;
+                                if (sec.hp <= 0)
+                                {
+                                    securities.RemoveAt(j);
+                                    score += 10;
+                                }
+                                break;
+                            }
+                        }
+
+                        if (hit) bullets.RemoveAt(i);
+                    }
+
+                    if (shootFrameTimer > 0)
+                    {
+                        shootFrameTimer--;
+                        if (shootFrameTimer == 0) isShootingDuck = false;
+                    }
+                }
+                drawDb(CreateGraphics());
 			}
 			else
 			{
@@ -2604,7 +2723,22 @@ namespace Bun_Ducky
 
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.Escape)
+            if (e.KeyCode == Keys.R && lvl == 2)
+            {
+
+                if (!heros[0].isRat && !heros[0].isDead)
+                {
+                    FireBullet(true);
+                }
+            }
+            if (e.KeyCode == Keys.F && lvl == 2)
+            {
+                if (!heros[0].isRat && !heros[0].isDead)
+                {
+                    FireBullet(false);
+                }	
+            }
+            if (e.KeyCode == Keys.Escape)
 			{
 				if (!showMenu)
 				{
@@ -2687,7 +2821,7 @@ namespace Bun_Ducky
 					}
 
 				}
-				if (e.KeyCode == Keys.R)
+				if (e.KeyCode == Keys.P)
 				{
 					if (heros[0].isDead)
 					{
@@ -2843,7 +2977,7 @@ namespace Bun_Ducky
 							{
 								heros[0].repairedElevator = true;
 								elevators[0].moveDir = 1;
-								elevators[0].speed = 2;
+								elevators[0].speed = 5;
 							}
 						}
 					}
@@ -3053,14 +3187,7 @@ namespace Bun_Ducky
 						heros[0].isIdelDuck = false;
 					}
 				}
-				if (e.KeyCode == Keys.F)
-				{
-					if (!heros[0].isRat && !heros[0].isAttkDuck)
-					{
-						heros[0].isAttkDuck = true;
-						heros[0].currentAttkFrameDuckRight = 0;
-					}
-				}
+			
 				if (e.KeyCode == Keys.Up)
 				{
 					if (!heros[0].isRat && !heros[0].isJumpDuckRight && !heros[0].isJumpDuckLeft && !heros[0].isJumpDuckUp)
@@ -3576,7 +3703,43 @@ namespace Bun_Ducky
 					g2.DrawString(sec.hmmStr, fHmm, Brushes.White, sec.x - xStart + 10, sec.y - yStart - 36);
 				}
 			}
-			if (!showMenu)
+            if (lvl == 2)
+            {
+                for (int i = 0; i < bullets.Count; i++)
+                {
+                    bullet b = bullets[i];
+                    g2.DrawImage(b.frames[b.currentFrame],
+                        b.x - xStart, b.y - yStart, 32, 32);
+                }
+
+                if (isShootingDuck && !heros[0].isRat && !heros[0].isDead)
+                {
+                    bool fr = false;
+                    if (heros[0].isRightDuck) fr = true;
+                    if (!heros[0].isRightDuck && !heros[0].isLeftDuck) fr = true;
+
+                    List<Bitmap> atkFrames = atkFramesLeft;
+                    if (fr) atkFrames = atkFramesRight;
+
+                    int fi = (10 - shootFrameTimer) * atkFrames.Count / 10;
+                    fi = Math.Min(fi, atkFrames.Count - 1);
+                    g2.DrawImage(atkFrames[fi],
+                        heros[0].xDuck - xStart - 10,
+                        heros[0].yDuck - yStart,
+                        90, 70);
+                }
+
+                for (int i = 0; i < securities.Count; i++)
+                {
+                    int bx = securities[i].x - xStart + 10;
+                    int by = securities[i].y - yStart - 14;
+                    g2.FillRectangle(Brushes.DarkRed, bx, by, 80, 8);
+                    int filled = (int)(80 * securities[i].hp / 3.0);
+                    g2.FillRectangle(Brushes.Lime, bx, by, filled, 8);
+                    g2.DrawRectangle(Pens.White, bx, by, 80, 8);
+                }
+            }
+            if (!showMenu)
 			{
 				// dashboard
 				g2.FillRectangle(Brushes.Black, 10, 10, 160, 50);
@@ -3871,7 +4034,18 @@ namespace Bun_Ducky
 		public int y;
 		public Bitmap img;
 	}
-	class hero
+    class bullet
+    {
+        public int x;
+        public int y;
+        public int dx;      // horizontal speed (+= right, -= left)
+        public int dy;      // vertical spread for multi-shot
+        public bool isMulti;
+        public int currentFrame;
+        public List<Bitmap> frames; // animation frames
+        public bool facingRight;
+    }
+    class hero
 	{
 		//============================
 		public bool hasKey;
@@ -4008,7 +4182,8 @@ namespace Bun_Ducky
 	}
 	class security
 	{
-		public int x;
+        public int hp = 3;
+        public int x;
 		public int y;
 		public int startX;
 		public int targetX;
