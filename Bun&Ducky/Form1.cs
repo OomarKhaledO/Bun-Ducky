@@ -86,6 +86,8 @@ namespace Bun_Ducky
 					save.rabbitY = Convert.ToInt16(temp[8]);   // RabbitY
 					save.keysCollected = Convert.ToInt16(temp[9]);   // KeysCollected
 					save.chicksCollected = Convert.ToInt16(temp[10]); // ChicksCollected
+					save.repairedElevator = Convert.ToBoolean(temp[11]); // elevators code
+					save.stoleTut = Convert.ToBoolean(temp[12]); // elevators code
 					savedGames.Add(save);
 					savedGamesList.Items.Add($"{save.id} - Level {save.level} - Score {save.score}");
 
@@ -119,9 +121,11 @@ namespace Bun_Ducky
 			public int rabbitY;
 			public int keysCollected;
 			public int chicksCollected;
-		}
+            public bool repairedElevator;
+            public bool stoleTut;
+        }
 
-		private void button4_Click(object sender, EventArgs e)
+        private void button4_Click(object sender, EventArgs e)
 		{
 			if (savedGamesList.SelectedIndex >= 0 && savedGamesList.SelectedIndex < savedGames.Count)
 			{
