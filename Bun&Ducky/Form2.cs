@@ -15,6 +15,11 @@ namespace Bun_Ducky
 
 	public partial class Form2 : Form
 	{
+        List<bullet> enemyBullets = new List<bullet>();
+        int heroHitPoints = 3;
+        int heroHitCooldown = 0;
+        int bulletSecShootTimer = 0;
+        int bulletSecShotCount = 0;
         List<bullet> bullets = new List<bullet>();
         List<Bitmap> atkFramesRight = new List<Bitmap>();  // a1r..a5r
         List<Bitmap> atkFramesLeft = new List<Bitmap>();  // a1l..a5l
@@ -107,8 +112,21 @@ namespace Bun_Ducky
             int speed = -18;
             if (facingRight) speed = 18;
 
-            List<Bitmap> frames = atkFramesLeft;
-            if (facingRight) frames = atkFramesRight;
+            List<Bitmap> frames = new List<Bitmap>();
+            if (facingRight)
+            {
+                for (int i = 0; i < atkFramesRight.Count; i++)
+                {
+                    frames.Add(atkFramesRight[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < atkFramesLeft.Count; i++)
+                {
+                    frames.Add(atkFramesLeft[i]);
+                }
+            }
 
             if (single)
             {
@@ -956,10 +974,15 @@ namespace Bun_Ducky
 			securities.Clear();
 			item.Clear();
 			paintings.Clear();
-
+            enemyBullets.Clear();
+            heroHitPoints = 3;
+            heroHitCooldown = 0;
+            bulletSecShootTimer = 0;
+            bulletSecShotCount = 0;
             bullets.Clear();
+            
             // Reset enemy hp when level loads
-           
+
             foreach (var s in securities) s.hp = 3;
             if (heros.Count > 0)
 			{
@@ -1560,8 +1583,8 @@ namespace Bun_Ducky
 					securities.Add(s);
 				}
 
-				//tena Security
-				for (int i = 0; i < 1; i++)
+                //tena Security
+                for (int i = 0; i < 1; i++)
 				{
 					security s = new security();
 					s.x = 1710;
@@ -1594,7 +1617,42 @@ namespace Bun_Ducky
 					}
 					securities.Add(s);
 				}
-				showChapterScreen = true;
+                //Bullet Security
+                for (int i = 0; i < 1; i++)
+                {
+                    security s = new security();
+                    s.x = 2150;
+                    s.y = 1062;
+                    s.startX = 1710;
+                    s.targetX = 595;
+                    s.state = 0;
+                    s.stateCt = 0;
+                    s.facingLeft = true;
+                    s.idleImgsSec = new List<Bitmap>();
+                    s.seenCt = 0;
+                    s.hmmStr = ". h";
+                    s.hmmCt = 0;
+                    for (int j = 0; j < 4; j++)
+                    {
+                        Bitmap b = new Bitmap("lvl2\\security\\idle\\idlee" + (j + 1) + ".png");
+                        s.idleImgsSec.Add(b);
+                    }
+                    s.walkImgsSecLeft = new List<Bitmap>();
+                    for (int j = 0; j < 8; j++)
+                    {
+                        Bitmap b = new Bitmap("lvl2\\security\\walk\\walkB" + (j + 1) + ".png");
+                        s.walkImgsSecLeft.Add(b);
+                    }
+                    s.walkImgsSecRight = new List<Bitmap>();
+                    for (int j = 0; j < 8; j++)
+                    {
+                        Bitmap b = new Bitmap("lvl2\\security\\walk\\walk" + (j + 1) + ".png");
+                        s.walkImgsSecRight.Add(b);
+                    }
+                    securities.Add(s);
+                    securities[2].isBulletSec = true;
+                }
+                showChapterScreen = true;
 				chapterText = "Chapter 2: The Museum";
 				chapterScreenTimer = 0;
 			}
@@ -2117,24 +2175,37 @@ namespace Bun_Ducky
 					ptrv.currentKeyFrame = (ptrv.currentKeyFrame + 1) % ptrv.imgs.Count;
 				}
 
-				for (int i = keysLvl1.Count - 1; i >= 0; i--)
-				{
-					int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-					int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-					int heroW = heros[0].isRat ? 100 : 70;
-					int heroH = heros[0].isRat ? 100 : 70;
-
-					if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
-					{
-						if (heroY + heroH >= keysLvl1[i].y && heroY <= keysLvl1[i].y + 30)
-						{
-							keysLvl1.RemoveAt(i);
-							heros[0].hasKey = true;
-						}
-					}
-				}
-				//chick
-				for (int i = 0; i < chicks.Count; i++)
+                for (int i = keysLvl1.Count - 1; i >= 0; i--)
+                {
+                    int heroX = 0;
+                    int heroY = 0;
+                    int heroW = 0;
+                    int heroH = 0;
+                    if (heros[0].isRat)
+                    {
+                        heroX = heros[0].xRabbit;
+                        heroY = heros[0].yRabbit;
+                        heroW = 100;
+                        heroH = 100;
+                    }
+                    else
+                    {
+                        heroX = heros[0].xDuck;
+                        heroY = heros[0].yDuck;
+                        heroW = 70;
+                        heroH = 70;
+                    }
+                    if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
+                    {
+                        if (heroY + heroH >= keysLvl1[i].y && heroY <= keysLvl1[i].y + 30)
+                        {
+                            keysLvl1.RemoveAt(i);
+                            heros[0].hasKey = true;
+                        }
+                    }
+                }
+                //chick
+                for (int i = 0; i < chicks.Count; i++)
 				{
 					chick c = chicks[i];
 					c.currentChickFrame = (c.currentChickFrame + 1) % c.imgs.Count;
@@ -2571,7 +2642,158 @@ namespace Bun_Ducky
 							}
 						}
 					}
-				}
+                    // Bullet Security
+                    security bsec = null;
+                    for (int bsi = 0; bsi < securities.Count; bsi++)
+                    {
+                        if (securities[bsi].isBulletSec)
+                        {
+                            bsec = securities[bsi];
+                            break;
+                        }
+                    }
+                    if (bsec != null)
+                    {
+                        int heroX = 0;
+                        int heroY = 0;
+                        if (heros[0].isRat)
+                        {
+                            heroX = heros[0].xRabbit;
+                            heroY = heros[0].yRabbit;
+                        }
+                        else
+                        {
+                            heroX = heros[0].xDuck;
+                            heroY = heros[0].yDuck;
+                        }
+
+                        bool heroInRange = false;
+                        if (heroX >= 1365 && heroY >= 950 && heroY <= 1200)
+                        {
+                            heroInRange = true;
+                        }
+
+                        if (heroInRange)
+                        {
+                            bsec.sawHero = true;
+                        }
+
+                        if (bsec.sawHero)
+                        {
+                            bsec.currentIdleFrameSec = (bsec.currentIdleFrameSec + 1) % bsec.idleImgsSec.Count;
+
+                            bulletSecShootTimer++;
+
+                            bool doMulti = false;
+                            if (bulletSecShotCount > 0 && bulletSecShotCount % 2 == 0)
+                            {
+                                doMulti = true;
+                            }
+
+                            if (bulletSecShootTimer >= 60)
+                            {
+                                bulletSecShootTimer = 0;
+                                bulletSecShotCount++;
+
+                                if (doMulti)
+                                {
+                                    int[] spreads = { -4, 0, 4 };
+                                    foreach (int spread in spreads)
+                                    {
+                                        bullet eb = new bullet();
+                                        eb.x = bsec.x;
+                                        eb.y = bsec.y + 60;
+                                        eb.dx = -14;
+                                        eb.dy = spread;
+                                        eb.isMulti = true;
+                                        eb.facingRight = false;
+                                        eb.currentFrame = 0;
+                                        eb.frames = new List<Bitmap>();
+                                        for (int fi = 0; fi < atkFramesLeft.Count; fi++)
+                                        {
+                                            eb.frames.Add(atkFramesLeft[fi]);
+                                        }
+                                        enemyBullets.Add(eb);
+                                    }
+                                }
+                                else
+                                {
+                                    bullet eb = new bullet();
+                                    eb.x = bsec.x;
+                                    eb.y = bsec.y + 60;
+                                    eb.dx = -14;
+                                    eb.dy = 0;
+                                    eb.isMulti = false;
+                                    eb.facingRight = false;
+                                    eb.currentFrame = 0;
+                                    eb.frames = new List<Bitmap>();
+                                    for (int fi = 0; fi < atkFramesLeft.Count; fi++)
+                                    {
+                                        eb.frames.Add(atkFramesLeft[fi]);
+                                    }
+                                    enemyBullets.Add(eb);
+                                }
+                            }
+                        }
+                    }
+                    if (heroHitCooldown > 0)
+                    {
+                        heroHitCooldown--;
+                    }
+
+                    for (int i = enemyBullets.Count - 1; i >= 0; i--)
+                    {
+                        bullet eb = enemyBullets[i];
+                        eb.x += eb.dx;
+                        eb.y += eb.dy;
+                        eb.currentFrame = (eb.currentFrame + 1) % eb.frames.Count;
+
+                        bool offScreen = false;
+                        if (eb.x < xStart - 100) offScreen = true;
+                        if (eb.x > xStart + this.ClientSize.Width + 100) offScreen = true;
+                        if (eb.y < yStart - 100) offScreen = true;
+                        if (eb.y > yStart + this.ClientSize.Height + 100) offScreen = true;
+
+                        if (offScreen)
+                        {
+                            enemyBullets.RemoveAt(i);
+                            continue;
+                        }
+
+                        bool hitHero = false;
+                        if (heroHitCooldown == 0)
+                        {
+                            int hx = 0;
+                            int hy = 0;
+                            if (heros[0].isRat)
+                            {
+                                hx = heros[0].xRabbit;
+                                hy = heros[0].yRabbit;
+                            }
+                            else
+                            {
+                                hx = heros[0].xDuck;
+                                hy = heros[0].yDuck;
+                            }
+                            if (eb.x >= hx && eb.x <= hx + 70
+                                && eb.y >= hy && eb.y <= hy + 70)
+                            {
+                                hitHero = true;
+                            }
+                        }
+
+                        if (hitHero)
+                        {
+                            enemyBullets.RemoveAt(i);
+                            heroHitPoints--;
+                            heroHitCooldown = 60;
+                            if (heroHitPoints <= 0)
+                            {
+                                heros[0].isDead = true;
+                            }
+                        }
+                    }
+                }
                 // frog update
                 /*
 				for (int i = 0; i < frogs.Count; i++)
@@ -2674,7 +2896,7 @@ namespace Bun_Ducky
                         for (int j = securities.Count - 1; j >= 0; j--)
                         {
                             security sec = securities[j];
-                            if (sec.state == 5) continue;
+                          
                             if (b.x >= sec.x && b.x <= sec.x + 140
                                 && b.y >= sec.y && b.y <= sec.y + 140)
                             {
@@ -2781,45 +3003,47 @@ namespace Bun_Ducky
 						heroX = heros[0].xDuck;
 						heroY = heros[0].yDuck;
 					}
-
-					for (int i = 0; i < 1; i++)
+					if (lvl == 1)
 					{
-						if (heroX + 70 >= frogs[i].x - 100 && heroX <= frogs[i].x + 100)
+						for (int i = 0; i < 1; i++)
 						{
-							if (heroY + 70 >= frogs[i].y - 100 && heroY <= frogs[i].y + 100)
+							if (heroX + 70 >= frogs[i].x - 100 && heroX <= frogs[i].x + 100)
 							{
-								if (showFrogDialog)
+								if (heroY + 70 >= frogs[i].y - 100 && heroY <= frogs[i].y + 100)
 								{
+									if (showFrogDialog)
+									{
+										showFrogDialog = false;
+									}
+									else
+									{
+										showFrogDialog = true;
+									}
+									break;
+								}
+							}
+						}
+
+						for (int i = 0; i < 1; i++)
+						{
+							if (heroX + 70 >= frogs[1].x - 100 && heroX <= frogs[1].x + 100)
+							{
+								if (heroY + 70 >= frogs[1].y - 100 && heroY <= frogs[1].y + 100)
+								{
+									if (showFrogDialog2)
+									{
+										showFrogDialog2 = false;
+									}
+									else
+									{
+										showFrogDialog2 = true;
+									}
 									showFrogDialog = false;
+									break;
 								}
-								else
-								{
-									showFrogDialog = true;
-								}
-								break;
 							}
 						}
 					}
-					for (int i = 0; i < 1; i++)
-					{
-						if (heroX + 70 >= frogs[1].x - 100 && heroX <= frogs[1].x + 100)
-						{
-							if (heroY + 70 >= frogs[1].y - 100 && heroY <= frogs[1].y + 100)
-							{
-								if (showFrogDialog2)
-								{
-									showFrogDialog2 = false;
-								}
-								else
-								{
-									showFrogDialog2 = true;
-								}
-								showFrogDialog = false;
-								break;
-							}
-						}
-					}
-
 				}
 				if (e.KeyCode == Keys.P)
 				{
@@ -2882,78 +3106,114 @@ namespace Bun_Ducky
 				}
 				if (e.KeyCode == Keys.E)
 				{
-					// paintings pickup
-					for (int i = paintings.Count - 1; i >= 0; i--)
-					{
-						int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-						int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-						int heroW = heros[0].isRat ? 100 : 70;
-						int heroH = heros[0].isRat ? 100 : 70;
+                    // paintings pickup
+                    for (int i = paintings.Count - 1; i >= 0; i--)
+                    {
+                        int heroX = 0;
+                        int heroY = 0;
+                        int heroW = 0;
+                        int heroH = 0;
+                        if (heros[0].isRat)
+                        {
+                            heroX = heros[0].xRabbit;
+                            heroY = heros[0].yRabbit;
+                            heroW = 100;
+                            heroH = 100;
+                        }
+                        else
+                        {
+                            heroX = heros[0].xDuck;
+                            heroY = heros[0].yDuck;
+                            heroW = 70;
+                            heroH = 70;
+                        }
+                        if (heroX + heroW >= paintings[i].x && heroX <= paintings[i].x + paintings[i].width)
+                        {
+                            if (heroY + heroH >= paintings[i].y && heroY <= paintings[i].y + paintings[i].height)
+                            {
+                                paintings.RemoveAt(i);
+                                score += 10;
+                            }
+                        }
+                    }
 
-						if (heroX + heroW >= paintings[i].x && heroX <= paintings[i].x + paintings[i].width)
-						{
-							if (heroY + heroH >= paintings[i].y && heroY <= paintings[i].y + paintings[i].height)
-							{
-								paintings.RemoveAt(i);
-								score += 10;
-							}
-						}
-					}
+                    // items pickup
+                    for (int i = item.Count - 1; i >= 0; i--)
+                    {
+                        int heroX = 0;
+                        int heroY = 0;
+                        int heroW = 0;
+                        int heroH = 0;
+                        if (heros[0].isRat)
+                        {
+                            heroX = heros[0].xRabbit;
+                            heroY = heros[0].yRabbit;
+                            heroW = 100;
+                            heroH = 100;
+                        }
+                        else
+                        {
+                            heroX = heros[0].xDuck;
+                            heroY = heros[0].yDuck;
+                            heroW = 70;
+                            heroH = 70;
+                        }
+                        if (heroX + heroW >= item[i].x && heroX <= item[i].x + item[i].width)
+                        {
+                            if (heroY + heroH >= item[i].y && heroY <= item[i].y + item[i].height)
+                            {
+                                Form4 f4 = new Form4();
+                                f4.ShowDialog();
+                                if (f4.maskReleased)
+                                {
+                                    heros[0].stoleTut = true;
+                                    item.RemoveAt(i);
+                                    score += 50;
+                                }
+                            }
+                        }
+                    }
+                    if (heros[0].hasKey)
+                    {
+                        int heroX = 0;
+                        int heroY = 0;
+                        int heroW = 0;
+                        int heroH = 0;
+                        if (heros[0].isRat)
+                        {
+                            heroX = heros[0].xRabbit;
+                            heroY = heros[0].yRabbit;
+                            heroW = 100;
+                            heroH = 100;
+                        }
+                        else
+                        {
+                            heroX = heros[0].xDuck;
+                            heroY = heros[0].yDuck;
+                            heroW = 70;
+                            heroH = 70;
+                        }
+                        for (int i = doors.Count - 1; i >= 0; i--)
+                        {
+                            if (heroX + heroW >= doors[i].x && heroX <= doors[i].x + doors[i].img.Width)
+                            {
+                                if (heroY + heroH >= doors[i].y && heroY <= doors[i].y + doors[i].img.Height + 30)
+                                {
+                                    doors.RemoveAt(i);
+                                    heros[0].hasKey = false;
+                                    if (i == 0)
+                                    {
+                                        lvl++;
+                                        currentSaveId = -1;
+                                        LoadLevel(lvl);
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-					// items pickup
-					for (int i = item.Count - 1; i >= 0; i--)
-					{
-						int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-						int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-						int heroW = heros[0].isRat ? 100 : 70;
-						int heroH = heros[0].isRat ? 100 : 70;
-
-						if (heroX + heroW >= item[i].x && heroX <= item[i].x + item[i].width)
-						{
-							if (heroY + heroH >= item[i].y && heroY <= item[i].y + item[i].height)
-							{
-								Form4 f4 = new Form4();
-								f4.ShowDialog();
-
-								if (f4.maskReleased)
-								{
-									heros[0].stoleTut = true;
-									item.RemoveAt(i);
-									score += 50;
-								}
-							}
-						}
-					}
-					if (heros[0].hasKey)
-					{
-						int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-						int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-						int heroW = heros[0].isRat ? 100 : 70;
-						int heroH = heros[0].isRat ? 100 : 70;
-
-						for (int i = doors.Count - 1; i >= 0; i--)
-						{
-							if (heroX + heroW >= doors[i].x && heroX <= doors[i].x + doors[i].img.Width)
-							{
-								if (heroY + heroH >= doors[i].y && heroY <= doors[i].y + doors[i].img.Height + 30)
-								{
-									doors.RemoveAt(i);
-									heros[0].hasKey = false;
-
-
-									if (i == 0)
-									{
-										lvl++;
-										currentSaveId = -1;
-										LoadLevel(lvl);
-									}
-								}
-							}
-						}
-					}
-
-					//elevator code
-					if (lvl == 2 && !heros[0].repairedElevator)
+                    //elevator code
+                    if (lvl == 2 && !heros[0].repairedElevator)
 					{
 						int heroX = 0;
 						int heroY = 0;
@@ -3708,9 +3968,21 @@ namespace Bun_Ducky
                 for (int i = 0; i < bullets.Count; i++)
                 {
                     bullet b = bullets[i];
-                    g2.DrawImage(b.frames[b.currentFrame],
-                        b.x - xStart, b.y - yStart, 32, 32);
+                    g2.FillEllipse(Brushes.Yellow, b.x - xStart, b.y - yStart, 18, 18);
                 }
+
+                for (int i = 0; i < enemyBullets.Count; i++)
+                {
+                    bullet eb = enemyBullets[i];
+                    g2.FillEllipse(Brushes.OrangeRed, eb.x - xStart, eb.y - yStart, 18, 18);
+                }
+
+                // hero HP bar
+                g2.FillRectangle(Brushes.DarkRed, 240, 10, 80, 14);
+                int hpFilled = (int)(80 * heroHitPoints / 3.0);
+                g2.FillRectangle(Brushes.Red, 240, 10, hpFilled, 14);
+                g2.DrawRectangle(Pens.White, 240, 10, 80, 14);
+                g2.DrawString("HP", fontDash, brushYellow, 245, 8);
 
                 if (isShootingDuck && !heros[0].isRat && !heros[0].isDead)
                 {
@@ -4182,6 +4454,8 @@ namespace Bun_Ducky
 	}
 	class security
 	{
+        public bool isBulletSec = false;
+        public bool sawHero = false;
         public int hp = 3;
         public int x;
 		public int y;
