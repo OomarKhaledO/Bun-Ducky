@@ -254,12 +254,14 @@ namespace Bun_Ducky
 			//JUMP END
 			pnn.deathDuck = new Bitmap("hFrames\\death\\death.png");
 			pnn.hitWallDuck = new Bitmap("hFrames\\hitWall\\wall_hit.png");
-			//   === DUCK /> ===
+            pnn.shootDuck = new Bitmap("hFrames\\bullet\\shoot.png");
+            pnn.shootDuckB = new Bitmap("hFrames\\bullet\\shootB.png");
+            //   === DUCK /> ===
 
 
-			// = = = = = = = = = = = = = = = = = = =
-			//   === < RABBIT ===
-			pnn.xRabbit = pnn.xDuck;
+            // = = = = = = = = = = = = = = = = = = =
+            //   === < RABBIT ===
+            pnn.xRabbit = pnn.xDuck;
 			pnn.yRabbit = pnn.yDuck - 30;
 			//IDLE
 			//RIGHT
@@ -333,6 +335,45 @@ namespace Bun_Ducky
 				Bitmap b = new Bitmap("hFrames\\transform\\t" + (i + 1) + ".png");
 				pnn.transformImgs.Add(b);
             }
+			pnn.singleBullet = new bullet();
+			pnn.singleBullet.x = -1;
+			pnn.singleBullet.y = -1;
+			pnn.singleBullet.shootImgsLeft = new List<Bitmap>();
+			for (int i = 0; i < 3; i++)
+			{
+                Bitmap b = new Bitmap("hFrames\\bullet\\bullet" + (i + 1) + ".png");
+                pnn.singleBullet.shootImgsLeft.Add(b);
+            }
+			pnn.singleBullet.shootImgsRight = new List<Bitmap>();
+            for (int i = 0; i < 3; i++)
+            {
+                Bitmap b = new Bitmap("hFrames\\bullet\\bulletR" + (i + 1) + ".png");
+                pnn.singleBullet.shootImgsRight.Add(b);
+            }
+
+            pnn.bullets = new List<bullet>();
+            for (int i = 0; i < 3; i++)
+            {
+                bullet mb = new bullet();
+                mb.x = -1;
+                mb.y = -1;
+                mb.active = false;
+                mb.rangeCt = 0;
+                mb.shootImgsLeft = new List<Bitmap>();
+                for (int j = 0; j < 3; j++)
+                {
+                    Bitmap b = new Bitmap("hFrames\\bullet\\bullet" + (j + 1) + ".png");
+                    mb.shootImgsLeft.Add(b);
+                }
+                mb.shootImgsRight = new List<Bitmap>();
+                for (int j = 0; j < 3; j++)
+                {
+                    Bitmap b = new Bitmap("hFrames\\bullet\\bulletR" + (j + 1) + ".png");
+                    mb.shootImgsRight.Add(b);
+                }
+                pnn.bullets.Add(mb);
+            }
+
             heros.Add(pnn);
 			LoadLevel(lvl);
 			if (save != null)
@@ -632,7 +673,9 @@ namespace Bun_Ducky
 				if (rabbitCenterX >= tilesLvl1[i].x && rabbitCenterX <= tilesLvl1[i].x + tilesLvl1[i].img.Width)
 				{
 					if (rabbitFeetY >= tilesLvl1[i].y && rabbitFeetY <= tilesLvl1[i].y + 15)
+					{
 						return true;
+					}
 				}
 			}
 			return false;
@@ -649,7 +692,9 @@ namespace Bun_Ducky
 				if (rabbitCenterX >= boxes[i].x && rabbitCenterX <= boxes[i].x + 120)
 				{
 					if (rabbitFeetY >= boxes[i].y && rabbitFeetY <= boxes[i].y + 15)
+					{
 						return true;
+					}
 				}
 			}
 			return false;
@@ -1492,7 +1537,14 @@ namespace Bun_Ducky
 						Bitmap b = new Bitmap("lvl2\\security\\walk\\walk" + (j + 1) + ".png");
 						s.walkImgsSecRight.Add(b);
 					}
-					securities.Add(s);
+                    s.popImgs = new List<Bitmap>();
+                    for (int j = 0; j < 10; j++)
+                    {
+                        Bitmap b = new Bitmap("lvl2\\vfx\\pop\\s" + (j + 1) + ".png");
+                        s.popImgs.Add(b);
+                    }
+
+                    securities.Add(s);
 				}
 
 				//tena Security
@@ -1527,9 +1579,70 @@ namespace Bun_Ducky
 						Bitmap b = new Bitmap("lvl2\\security\\walk\\walk" + (j + 1) + ".png");
 						s.walkImgsSecRight.Add(b);
 					}
-					securities.Add(s);
+                    s.popImgs = new List<Bitmap>();
+                    for (int j = 0; j < 10; j++)
+                    {
+                        Bitmap b = new Bitmap("lvl2\\vfx\\pop\\s" + (j + 1) + ".png");
+                        s.popImgs.Add(b);
+                    }
+                    s.bahImgs = new List<Bitmap>();
+                    for (int j = 0; j < 16; j++)
+                    {
+                        Bitmap b = new Bitmap("lvl2\\vfx\\bah\\bah (" + (j + 1) + ").png");
+                        s.bahImgs.Add(b);
+                    }
+                    securities.Add(s);
 				}
-				showChapterScreen = true;
+                // Gun Security
+                security gs = new security();
+                gs.x = 2000;
+                gs.y = 1062;
+                gs.startX = 2000;
+                gs.targetX = 2000;
+                gs.state = 0;
+                gs.stateCt = 0;
+                gs.facingLeft = true;
+                gs.seenCt = 0;
+                gs.hmmStr = "";
+                gs.hmmCt = 0;
+                gs.idleImgsSec = new List<Bitmap>();
+                for (int j = 0; j < 4; j++)
+                {
+                    Bitmap b = new Bitmap("lvl2\\security\\idle\\idle" + (j + 1) + ".png");
+                    gs.idleImgsSec.Add(b);
+                }
+                gs.idleImgsSecB = new List<Bitmap>();
+                for (int j = 0; j < 4; j++)
+                {
+                    Bitmap b = new Bitmap("lvl2\\security\\idle\\idleB" + (j + 1) + ".png");
+                    gs.idleImgsSecB.Add(b);
+                }
+                gs.walkImgsSecLeft = new List<Bitmap>();
+                for (int j = 0; j < 8; j++)
+                {
+                    Bitmap b = new Bitmap("lvl2\\security\\walk\\walkB" + (j + 1) + ".png");
+                    gs.walkImgsSecLeft.Add(b);
+                }
+                gs.walkImgsSecRight = new List<Bitmap>();
+                for (int j = 0; j < 8; j++)
+                {
+                    Bitmap b = new Bitmap("lvl2\\security\\walk\\walk" + (j + 1) + ".png");
+                    gs.walkImgsSecRight.Add(b);
+                }
+                gs.gunBulletLeft = new Bitmap("lvl2\\security\\gun\\bulletL.png");
+                gs.gunBulletRight = new Bitmap("lvl2\\security\\gun\\bulletR.png");
+                gs.gunBulletX = -1;
+                gs.gunBulletY = -1;
+                gs.popImgs = new List<Bitmap>();
+                for (int j = 0; j < 10; j++)
+                {
+                    Bitmap b = new Bitmap("lvl2\\vfx\\pop\\s" + (j + 1) + ".png");
+                    gs.popImgs.Add(b);
+                }
+
+
+                securities.Add(gs);
+                showChapterScreen = true;
 				chapterText = "Chapter 2: The Museum";
 				chapterScreenTimer = 0;
 			}
@@ -1564,7 +1677,7 @@ namespace Bun_Ducky
 					{
 						chapterColorVal += 20;
 					}
-					if (chapterScreenTimer > 100)
+					if (chapterScreenTimer > 50)
 					{
 						showChapterScreen = false;
 						chapterScreenTimer = 0;
@@ -1651,15 +1764,23 @@ namespace Bun_Ducky
 							int dy = ev.speed * ev.moveDir;
 							ev.y += dy;
 							ev.floor.y += dy;
-							
-							if (ev.y >= ev.bottomY) ev.moveDir = -1;
-							if (ev.y <= ev.topY) ev.moveDir = 1;
 
+							if (ev.y >= ev.bottomY)
+							{
+								ev.moveDir = -1;
+							}
+							if (ev.y <= ev.topY)
+							{
+								ev.moveDir = 1;
+							}
 							if (duckOnElevatorFloor())
+							{
 								heros[0].yDuck += dy;
-
+							}
 							if (rabbitOnElevatorFloor())
+							{
 								heros[0].yRabbit += dy;
+							}
 						}
 					}
 
@@ -1702,7 +1823,6 @@ namespace Bun_Ducky
                     {
                         heros[0].isTransforming = false;
                     }
-                    
                 }
                 if (heros[0].isRat)
 				{
@@ -1740,7 +1860,9 @@ namespace Bun_Ducky
 							heros[0].currentWalkFrameRabbitRight = (heros[0].currentWalkFrameRabbitRight + 1) % heros[0].walkImgsRabbitRight.Count;
 							int newRX = heros[0].xRabbit + 5;
 							if (!rabbitCollidesWithWall(newRX))
+							{
 								heros[0].xRabbit = newRX;
+							}
 						}
 						else if (heros[0].isLeftRabbit)
 						{
@@ -1750,7 +1872,9 @@ namespace Bun_Ducky
 							heros[0].currentWalkFrameRabbitLeft = (heros[0].currentWalkFrameRabbitLeft + 1) % heros[0].walkImgsRabbitLeft.Count;
 							int newRX = heros[0].xRabbit - 5;
 							if (!rabbitCollidesWithWall(newRX))
+							{
 								heros[0].xRabbit = newRX;
+							}
 						}
 					}
 					else if (heros[0].isRunRabbit)
@@ -1763,7 +1887,9 @@ namespace Bun_Ducky
 							heros[0].currentRunFrameRabbitRight = (heros[0].currentRunFrameRabbitRight + 1) % heros[0].runImgsRabbitRight.Count;
 							int newRX = heros[0].xRabbit + 15;
 							if (!rabbitCollidesWithWall(newRX))
+							{
 								heros[0].xRabbit = newRX;
+							}
 						}
 						else if (heros[0].isLeftRabbit)
 						{
@@ -1774,7 +1900,9 @@ namespace Bun_Ducky
 							heros[0].currentRunFrameRabbitLeft = (heros[0].currentRunFrameRabbitLeft + 1) % heros[0].runImgsRabbitLeft.Count;
 							int newRX = heros[0].xRabbit - 15;
 							if (!rabbitCollidesWithWall(newRX))
+							{
 								heros[0].xRabbit = newRX;
+							}
 						}
 						else
 						{
@@ -2054,12 +2182,27 @@ namespace Bun_Ducky
 
 				for (int i = keysLvl1.Count - 1; i >= 0; i--)
 				{
-					int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-					int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-					int heroW = heros[0].isRat ? 100 : 70;
-					int heroH = heros[0].isRat ? 100 : 70;
+                    int heroX = 0;
+                    int heroY = 0;
+                    int heroW = 0;
+                    int heroH = 0;
 
-					if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
+                    if (heros[0].isRat)
+                    {
+                        heroX = heros[0].xRabbit;
+                        heroY = heros[0].yRabbit;
+                        heroW = 100;
+                        heroH = 100;
+                    }
+                    else
+                    {
+                        heroX = heros[0].xDuck;
+                        heroY = heros[0].yDuck;
+                        heroW = 70;
+                        heroH = 70;
+                    }
+
+                    if (heroX + heroW >= keysLvl1[i].x && heroX <= keysLvl1[i].x + 30)
 					{
 						if (heroY + heroH >= keysLvl1[i].y && heroY <= keysLvl1[i].y + 30)
 						{
@@ -2326,34 +2469,60 @@ namespace Bun_Ducky
                                 
                             }
 						}
-						else if (sec.state == 4)
-						{
-							sec.currentWalkFrameSecRight =
-								(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+                        else if (sec.state == 4)
+                        {
+                            sec.currentWalkFrameSecRight =
+                                (sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
 
-							sec.x += 15;
+                            sec.x += 15;
 
-							if (sec.x >= sec.startX + 20)
-							{
-								sec.x = sec.startX + 20;
-								sec.stateCt = 0;
+                            if (sec.x >= sec.startX + 20)
+                            {
+                                sec.x = sec.startX + 20;
+                                sec.stateCt = 0;
 
-								if (sec.paintingWasStolen)
-								{
-									sec.state = 5;
-								}
-								else
-								{
-									sec.state = 0;
-								}
-							}
-						}
-						else if (sec.state == 5)
+                                if (sec.paintingWasStolen)
+                                {
+                                    sec.state = 5;
+                                }
+                                else
+                                {
+                                    sec.state = 0;
+                                    sec.laserOn = true;
+                                }
+                            }
+                        }
+                        else if (sec.state == 5)
 						{
 							sec.currentIdleFrameSec =
 								(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
 						}
-					}
+                        if (sec.laserOn)
+                        {
+                            int heroW = 0;
+                            int heroH = 0;
+                            if (heros[0].isRat)
+                            {
+                                heroW = 100;
+                                heroH = 100;
+                            }
+                            else
+                            {
+                                heroW = 70;
+                                heroH = 70;
+                            }
+
+                            // check if hero touches the painting
+                            if (heroX + heroW >= 1156 && heroX <= 1385)
+                            {
+                                if (heroY + heroH >= paintings[0].y && heroY <= paintings[0].y + 220)
+                                {
+                                    heros[0].isDead = true;
+                                }
+                            }
+                        }
+                    }
+
 
 					// Tena Security
 					// Tena Security
@@ -2361,26 +2530,74 @@ namespace Bun_Ducky
 					{
 						security sec = securities[1];
 
-						if (sec.state != 5)
-						{
-							// chick expired — remove it
-							if (heros[0].distract != null && heros[0].chickHoldCt == 1)
-							{
-								heros[0].distract = null;
-							}
+                        if (sec.state != 5)
+                        {
+                            // chick expired — remove it
+                            if (heros[0].distract != null && heros[0].chickHoldCt == 1)
+                            {
+                                heros[0].distract = null;
+                            }
 
-							if (sec.state == 0)
-							{
-								// just idle, do nothing until chick is placed
-								sec.currentIdleFrameSec =
-									(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+							int heroX = 0;
+							int heroY = 0;
 
-								if (item.Count == 0 && !heros[0].isRabbitTut)
+                            if (heros[0].isRat)
+							{
+								heroX = heros[0].xRabbit;
+								heroY = heros[0].yRabbit;
+
+                            }
+							else
+							{
+								heroX = heros[0].xDuck;
+								heroY = heros[0].yDuck;
+								
+                            }
+                            if (!sec.bahActive)
+                            {
+								if (!heros[0].isRabbitTut && heros[0].isRabbitMonalisa)
 								{
-									sec.state = 5;
+									if (heroX >= sec.x - 500 && heroX <= sec.x + 500)
+									{
+										if (heroY >= sec.y - 200 && heroY <= sec.y + 200)
+										{
+											sec.bahActive = true;
+											sec.bahCt = 0;
+											sec.bahX = sec.x;
+											sec.bahY = sec.y;
+										}
+									}
 								}
-							}
-							else if (sec.state == 6)
+                            }
+                            else
+                            {
+                                sec.bahCt++;
+                                if (sec.bahCt == 8)
+                                {
+                                    sec.bahX = heroX;
+                                    sec.bahY = heroY;
+                                    sec.x = heroX;
+                                    sec.y = heroY;
+                                }
+                                if (sec.bahCt >= 16)
+                                {
+                                    sec.bahActive = false;
+                                    sec.bahCt = 0;
+                                    heros[0].isDead = true;
+                                }
+                            }
+
+                            if (sec.state == 0)
+                            {
+                                sec.currentIdleFrameSec =
+                                    (sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+
+                                if (item.Count == 0 && !heros[0].isRabbitTut)
+                                {
+                                    sec.state = 5;
+                                }
+                            }
+                            else if (sec.state == 6)
 							{
 								// PHASE 0: x-- until x <= 1165
 								if (sec.x > 1165 && !sec.reached)
@@ -2500,10 +2717,188 @@ namespace Bun_Ducky
 							}
 						}
 					}
+                    // Gun Security (securities[2])
+                    // Gun Security (securities[2])
+                    if (securities.Count > 2)
+                    {
+                        security gs = securities[2];
 
-				}
-				// frog update
-				/*
+                        if (!gs.isDeadSec)
+                        {
+                            int heroX = 0;
+                            int heroY = 0;
+                          
+
+                            if (heros[0].isRat)
+                            {
+                                heroX = heros[0].xRabbit;
+                                heroY = heros[0].yRabbit;
+                               
+                            }
+                            else
+                            {
+                                heroX = heros[0].xDuck;
+                                heroY = heros[0].yDuck;
+                               
+                            }
+
+                            // check if hero enters range
+                            if (!gs.seesHero)
+                            {
+                                if (heroX >= gs.x - 400 && heroX <= gs.x + 400)
+                                {
+                                    if (heroY >= gs.y - 80 && heroY <= gs.y + 140)
+                                    {
+                                        gs.seesHero = true;
+                                    }
+                                }
+                            }
+
+                            if (!gs.seesHero)
+                            {
+                                gs.currentIdleFrameSec = (gs.currentIdleFrameSec + 1) % gs.idleImgsSecB.Count;
+                            }
+                            else
+                            {
+								if (heroX < gs.x)
+								{
+									gs.facingLeft = true;
+								}
+								else
+								{
+									gs.facingLeft = false;
+								}
+                                if (heroX < gs.x - 500)
+                                {
+                                    gs.currentWalkFrameSecLeft = (gs.currentWalkFrameSecLeft + 1) % gs.walkImgsSecLeft.Count;
+                                    gs.x -= 8;
+                                }
+                                else if (heroX > gs.x + 500)
+                                {
+                                    gs.currentWalkFrameSecRight = (gs.currentWalkFrameSecRight + 1) % gs.walkImgsSecRight.Count;
+                                    gs.x += 8;
+                                }
+                                else
+                                {
+                                    gs.currentIdleFrameSec = (gs.currentIdleFrameSec + 1) % gs.idleImgsSec.Count;
+                                }
+
+                                if (gs.gunShootDelay > 0)
+                                {
+                                    gs.gunShootDelay--;
+                                }
+
+                                if (!gs.gunBulletActive && gs.gunShootDelay == 0)
+                                {
+                                    gs.gunBulletActive = true;
+                                    gs.gunBulletGoingRight = !gs.facingLeft;
+                                    gs.gunBulletRangeCt = 0;
+
+									if (gs.gunBulletGoingRight)
+									{
+										gs.gunBulletX = gs.x + 140 + 10;
+									}
+									else
+									{
+										gs.gunBulletX = gs.x - 25;
+									}
+                                    gs.gunBulletY = gs.y + 70;
+                                    gs.gunShootDelay = 50;
+                                }
+
+                                if (gs.gunBulletActive)
+                                {
+                                    if (gs.gunBulletGoingRight)
+                                        gs.gunBulletX += 20;
+                                    else
+                                        gs.gunBulletX -= 20;
+
+                                    gs.gunBulletRangeCt++;
+                                    if (gs.gunBulletRangeCt >= 40)
+                                    {
+                                        gs.gunBulletActive = false;
+                                        gs.gunBulletRangeCt = 0;
+                                    }
+
+                                    int hLeft = heroX;
+                                    int hRight;
+                                    int hTop = heroY;
+                                    int hBottom;
+
+                                    if (heros[0].isRat)
+                                    {
+                                        hRight = heroX + 100;
+                                        hBottom = heroY + 100;
+                                    }
+                                    else
+                                    {
+                                        hRight = heroX + 70;
+                                        hBottom = heroY + 70;
+                                    }
+
+                                    if (gs.gunBulletX >= hLeft && gs.gunBulletX <= hRight)
+                                    {
+                                        if (gs.gunBulletY >= hTop && gs.gunBulletY <= hBottom)
+                                        {
+                                            gs.gunBulletActive = false;
+                                            gs.gunBulletRangeCt = 0;
+                                            heros[0].heroHits++;
+                                            if (heros[0].heroHits >= 3)
+                                            {
+                                                heros[0].isDead = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            
+                            // hero bullet hits gun security
+                            if (heros[0].singleBullet.active)
+                            {
+                                if (heros[0].singleBullet.x >= gs.x && heros[0].singleBullet.x <= gs.x + 140)
+                                {
+                                    if (heros[0].singleBullet.y >= gs.y && heros[0].singleBullet.y <= gs.y + 140)
+                                    {
+                                        gs.secHits++;
+                                        heros[0].singleBullet.active = false;
+                                        heros[0].singleBullet.rangeCt = 0;
+                                        if (gs.secHits >= 3)
+                                        {
+                                            gs.isDeadSec = true;
+                                            gs.popCt = 0;
+                                            gs.gunBulletActive = false;
+                                        }
+                                    }
+                                }
+                            }
+                            for (int b = 0; b < heros[0].bullets.Count; b++)
+                            {
+                                if (heros[0].bullets[b].active)
+                                {
+                                    if (heros[0].bullets[b].x >= gs.x && heros[0].bullets[b].x <= gs.x + 140)
+                                    {
+                                        if (heros[0].bullets[b].y >= gs.y && heros[0].bullets[b].y <= gs.y + 140)
+                                        {
+                                            gs.secHits++;
+                                            heros[0].bullets[b].active = false;
+                                            heros[0].bullets[b].rangeCt = 0;
+                                            if (gs.secHits >= 3)
+                                            {
+                                                gs.isDeadSec = true;
+                                                gs.popCt = 0;
+                                                gs.gunBulletActive = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+                // frog update
+                /*
 				for (int i = 0; i < frogs.Count; i++)
 				{
 					frog f = frogs[i];
@@ -2578,8 +2973,164 @@ namespace Bun_Ducky
 					}
 				}
 				*/
+                // ===== BULLET UPDATE =====
+                if (lvl == 2)
+                {
+                    // cooldown between shots
+                    if (heros[0].shootDelay > 0)
+                    {
+                        heros[0].shootDelay--;
+                    }
+                    // shoot pose timer
+                    if (heros[0].shootPoseCt > 0)
+                    {
+                        heros[0].shootPoseCt--;
+                        if (heros[0].shootPoseCt == 0)
+                        {
+                            heros[0].isShooting = false;
+                        }
+                    }
+                    // single bullet movement
+                    if (heros[0].singleBullet.active)
+                    {
+                        if (!heros[0].singleBullet.animDone)
+                        {
+                            if (heros[0].singleBullet.goingRight)
+                            {
+								if (heros[0].singleBullet.currentShootFrameRight < heros[0].singleBullet.shootImgsRight.Count - 1)
+								{
+									heros[0].singleBullet.currentShootFrameRight++;
+								}
+								else
+								{
+									heros[0].singleBullet.animDone = true;
+								}
+                            }
+                            else
+                            {
+								if (heros[0].singleBullet.currentShootFrameLeft < heros[0].singleBullet.shootImgsLeft.Count - 1)
+								{
+									heros[0].singleBullet.currentShootFrameLeft++;
+								}
+								else
+								{
+									heros[0].singleBullet.animDone = true;
+								}
+                            }
+                        }
 
-				drawDb(CreateGraphics());
+						if (heros[0].singleBullet.goingRight)
+						{
+							heros[0].singleBullet.x += 18;
+						}
+						else
+						{
+							heros[0].singleBullet.x -= 18;
+						}
+                        heros[0].singleBullet.rangeCt++;
+                        if (heros[0].singleBullet.rangeCt >= 22)
+                        {
+                            heros[0].singleBullet.active = false;
+                            heros[0].singleBullet.rangeCt = 0;
+                        }
+
+                        for (int i = 0; i < securities.Count; i++)
+                        {
+                            if (securities[i].state != 5)
+                            {
+                                if (heros[0].singleBullet.x >= securities[i].x && heros[0].singleBullet.x <= securities[i].x + 140)
+                                {
+                                    if (heros[0].singleBullet.y >= securities[i].y && heros[0].singleBullet.y <= securities[i].y + 140)
+                                    {
+                                        securities[i].secHits++;
+                                        heros[0].singleBullet.active = false;
+                                        heros[0].singleBullet.rangeCt = 0;
+                                        if (securities[i].secHits >= 3)
+                                        {
+                                            securities[i].state = 5;
+                                            securities[i].popCt = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+                   
+                    // multi bullet movement
+                    int activeMultiCount = 0;
+                    for (int b = 0; b < heros[0].bullets.Count; b++)
+                    {
+                        if (heros[0].bullets[b].active)
+                        {
+                            activeMultiCount++;
+
+                            if (!heros[0].bullets[b].animDone)
+                            {
+                                if (heros[0].bullets[b].goingRight)
+                                {
+									if (heros[0].bullets[b].currentShootFrameRight < heros[0].bullets[b].shootImgsRight.Count - 1)
+									{
+										heros[0].bullets[b].currentShootFrameRight++;
+									}
+									else
+									{
+										heros[0].bullets[b].animDone = true;
+									}
+                                }
+                                else
+                                {
+									if (heros[0].bullets[b].currentShootFrameLeft < heros[0].bullets[b].shootImgsLeft.Count - 1)
+									{
+										heros[0].bullets[b].currentShootFrameLeft++;
+									}
+									else
+									{
+										heros[0].bullets[b].animDone = true;
+									}
+                                }
+                            }
+
+							if (heros[0].bullets[b].goingRight)
+							{
+								heros[0].bullets[b].x += 18;
+							}
+							else
+							{
+								heros[0].bullets[b].x -= 18;
+							}
+                            heros[0].bullets[b].rangeCt++;
+                            if (heros[0].bullets[b].rangeCt >= 22)
+                            {
+                                heros[0].bullets[b].active = false;
+                                heros[0].bullets[b].rangeCt = 0;
+                            }
+
+                            for (int i = 0; i < securities.Count; i++)
+                            {
+                                if (securities[i].state != 5)
+                                {
+                                    if (heros[0].bullets[b].x >= securities[i].x && heros[0].bullets[b].x <= securities[i].x + 140)
+                                    {
+                                        if (heros[0].bullets[b].y >= securities[i].y && heros[0].bullets[b].y <= securities[i].y + 140)
+                                        {
+                                            securities[i].secHits++;
+                                            heros[0].bullets[b].active = false;
+                                            heros[0].bullets[b].rangeCt = 0;
+                                            if (securities[i].secHits >= 3)
+                                            {
+                                                securities[i].state = 5;
+                                                securities[i].popCt = 0;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                drawDb(CreateGraphics());
 			}
 			else
 			{
@@ -2751,30 +3302,76 @@ namespace Bun_Ducky
 					// paintings pickup
 					for (int i = paintings.Count - 1; i >= 0; i--)
 					{
-						int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-						int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-						int heroW = heros[0].isRat ? 100 : 70;
-						int heroH = heros[0].isRat ? 100 : 70;
+                        int heroX = 0;
+                        int heroY = 0;
 
-						if (heroX + heroW >= paintings[i].x && heroX <= paintings[i].x + paintings[i].width)
-						{
-							if (heroY + heroH >= paintings[i].y && heroY <= paintings[i].y + paintings[i].height)
-							{
-								paintings.RemoveAt(i);
-								score += 10;
-							}
-						}
-					}
+                        if (heros[0].isRat)
+                        {
+                            heroX = heros[0].xRabbit;
+                            heroY = heros[0].yRabbit;
+                        }
+                        else
+                        {
+                            heroX = heros[0].xDuck;
+                            heroY = heros[0].yDuck;
+                        }
+
+                        int heroW = 0;
+                        int heroH = 0;
+
+                        if (heros[0].isRat)
+                        {
+                            heroW = 100;
+                            heroH = 100;
+                        }
+                        else
+                        {
+                            heroW = 70;
+                            heroH = 70;
+                        }
+
+                        if (heroX + heroW >= paintings[i].x && heroX <= paintings[i].x + paintings[i].width)
+                        {
+                            if (heroY + heroH >= paintings[i].y && heroY <= paintings[i].y + paintings[i].height +  heroH)
+                            {
+                                if (securities[0].laserOn == true)
+                                {
+                                    heros[0].isDead = true;
+                                }
+                                else
+                                {
+                                    paintings.RemoveAt(i);
+                                    score += 10;
+                                }
+                                break;
+                            }
+                        }
+                    }
 
 					// items pickup
 					for (int i = item.Count - 1; i >= 0; i--)
 					{
-						int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-						int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-						int heroW = heros[0].isRat ? 100 : 70;
-						int heroH = heros[0].isRat ? 100 : 70;
+                        int heroX;
+                        int heroY;
+                        int heroW;
+                        int heroH;
 
-						if (heroX + heroW >= item[i].x && heroX <= item[i].x + item[i].width)
+                        if (heros[0].isRat)
+                        {
+                            heroX = heros[0].xRabbit;
+                            heroY = heros[0].yRabbit;
+                            heroW = 100;
+                            heroH = 100;
+                        }
+                        else
+                        {
+                            heroX = heros[0].xDuck;
+                            heroY = heros[0].yDuck;
+                            heroW = 70;
+                            heroH = 70;
+                        }
+
+                        if (heroX + heroW >= item[i].x && heroX <= item[i].x + item[i].width)
 						{
 							if (heroY + heroH >= item[i].y && heroY <= item[i].y + item[i].height)
 							{
@@ -2792,12 +3389,27 @@ namespace Bun_Ducky
 					}
 					if (heros[0].hasKey)
 					{
-						int heroX = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
-						int heroY = heros[0].isRat ? heros[0].yRabbit : heros[0].yDuck;
-						int heroW = heros[0].isRat ? 100 : 70;
-						int heroH = heros[0].isRat ? 100 : 70;
+                        int heroX;
+                        int heroY;
+                        int heroW;
+                        int heroH;
 
-						for (int i = doors.Count - 1; i >= 0; i--)
+                        if (heros[0].isRat)
+                        {
+                            heroX = heros[0].xRabbit;
+                            heroY = heros[0].yRabbit;
+                            heroW = 100;
+                            heroH = 100;
+                        }
+                        else
+                        {
+                            heroX = heros[0].xDuck;
+                            heroY = heros[0].yDuck;
+                            heroW = 70;
+                            heroH = 70;
+                        }
+
+                        for (int i = doors.Count - 1; i >= 0; i--)
 						{
 							if (heroX + heroW >= doors[i].x && heroX <= doors[i].x + doors[i].img.Width)
 							{
@@ -2932,7 +3544,138 @@ namespace Bun_Ducky
 						}
 					}
 				}
-				if (e.KeyCode == Keys.Q)
+                if (e.KeyCode == Keys.Z)
+                {
+                    if (lvl == 2 && !heros[0].singleBullet.active)
+                    {
+                        heros[0].isShooting = true;
+                        heros[0].shootPoseCt = 6;
+                        heros[0].singleBullet.active = true;
+                        heros[0].singleBullet.rangeCt = 0;
+                        heros[0].singleBullet.animDone = false;
+                        heros[0].singleBullet.currentShootFrameRight = 0;
+                        heros[0].singleBullet.currentShootFrameLeft = 0;
+
+                        if (heros[0].isRat)
+                        {
+                            if (heros[0].isLeftRabbit)
+                            {
+                                heros[0].singleBullet.goingRight = false;
+                                heros[0].singleBullet.x = heros[0].xRabbit - 25;
+                            }
+                            else
+                            {
+                                heros[0].singleBullet.goingRight = true;
+                                heros[0].singleBullet.x = heros[0].xRabbit + 100 + 10;
+                            }
+                            heros[0].singleBullet.y = heros[0].yRabbit + 40;
+                        }
+                        else
+                        {
+                            if (heros[0].isLeftDuck)
+                            {
+                                heros[0].singleBullet.goingRight = false;
+                                heros[0].singleBullet.x = heros[0].xDuck - 25;
+                            }
+                            else
+                            {
+                                heros[0].singleBullet.goingRight = true;
+                                heros[0].singleBullet.x = heros[0].xDuck + 70 + 10;
+                            }
+                            heros[0].singleBullet.y = heros[0].yDuck + 28;
+                        }
+                    }
+                }
+
+                if (e.KeyCode == Keys.X)
+                {
+                    if (lvl == 2 && heros[0].shootDelay == 0)
+                    {
+                        // count active multi bullets
+                        int activeCt = 0;
+                        for (int b = 0; b < heros[0].bullets.Count; b++)
+                        {
+                            if (heros[0].bullets[b].active)
+                                activeCt++;
+                        }
+
+                        if (activeCt < 5)
+                        {
+                            // find a free slot
+                            int freeSlot = -1;
+                            for (int b = 0; b < heros[0].bullets.Count; b++)
+                            {
+                                if (!heros[0].bullets[b].active)
+                                {
+                                    freeSlot = b;
+                                    break;
+                                }
+                            }
+
+                            if (freeSlot == -1)
+                            {
+                                // no free add a new one
+                                bullet nb = new bullet();
+                                nb.shootImgsLeft = new List<Bitmap>();
+                                nb.shootImgsRight = new List<Bitmap>();
+                                for (int j = 0; j < 3; j++)
+                                {
+                                    nb.shootImgsLeft.Add(heros[0].bullets[0].shootImgsLeft[j]);
+                                    nb.shootImgsRight.Add(heros[0].bullets[0].shootImgsRight[j]);
+                                }
+                                heros[0].bullets.Add(nb);
+                                freeSlot = heros[0].bullets.Count - 1;
+                            }
+
+                            bool goRight = true;
+                            int bX = 0;
+                            int bY = 0;
+
+                            if (heros[0].isRat)
+                            {
+                                if (heros[0].isLeftRabbit)
+                                {
+                                    goRight = false;
+                                    bX = heros[0].xRabbit - 25;
+                                }
+                                else
+                                {
+                                    goRight = true;
+                                    bX = heros[0].xRabbit + 100 + 10;
+                                }
+                                bY = heros[0].yRabbit + 40;
+                            }
+                            else
+                            {
+                                if (heros[0].isLeftDuck)
+                                {
+                                    goRight = false;
+                                    bX = heros[0].xDuck - 25;
+                                }
+                                else
+                                {
+                                    goRight = true;
+                                    bX = heros[0].xDuck + 70 + 10;
+                                }
+                                bY = heros[0].yDuck + 28;
+                            }
+
+                            heros[0].bullets[freeSlot].x = bX;
+                            heros[0].bullets[freeSlot].y = bY;
+                            heros[0].bullets[freeSlot].active = true;
+                            heros[0].bullets[freeSlot].goingRight = goRight;
+                            heros[0].bullets[freeSlot].rangeCt = 0;
+                            heros[0].bullets[freeSlot].currentShootFrameRight = 0;
+                            heros[0].bullets[freeSlot].currentShootFrameLeft = 0;
+                            heros[0].bullets[freeSlot].animDone = false;
+
+                            heros[0].isShooting = true;
+                            heros[0].shootPoseCt = 6;
+                            heros[0].shootDelay = 6;
+                        }
+                    }
+                }
+                if (e.KeyCode == Keys.Q)
 				{
 					if (lvl == 2)
 					{
@@ -3236,7 +3979,9 @@ namespace Bun_Ducky
 
 			g2.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
 			g2.Clear(Color.Black);
-			for (int i = 0; i < bgs.Count; i++)
+
+            int heroXForDraw = heros[0].isRat ? heros[0].xRabbit : heros[0].xDuck;
+            for (int i = 0; i < bgs.Count; i++)
 			{
 
 				bg pTrv = bgs[i];
@@ -3442,7 +4187,7 @@ namespace Bun_Ducky
 							{
 								g2.DrawImage(ptrv.jumpImgsDuckLeft[ptrv.currentJumpFrameDuckLeft], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
 							}
-							/*
+                            /*
 							else if (ptrv.isAttkDuck)
 							{
 								if (ptrv.isRightDuck)
@@ -3455,18 +4200,25 @@ namespace Bun_Ducky
 								}
 							}
 							*/
-							else
-							{
-								if (heros[0].fallingFrameCount > 8)
-								{
-									g2.DrawImage(ptrv.falling, ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
-								}
-								else
-								{
-									g2.DrawImage(ptrv.idelImgsDuckRight[ptrv.currentIdleFrameDuckRight], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
-								}
-							}
-						}
+                            else
+                            {
+                                if (heros[0].isShooting)
+                                {
+                                    if (heros[0].isLeftDuck)
+                                        g2.DrawImage(ptrv.shootDuckB, ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
+                                    else
+                                        g2.DrawImage(ptrv.shootDuck, ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
+                                }
+                                else if (heros[0].fallingFrameCount > 8)
+                                {
+                                    g2.DrawImage(ptrv.falling, ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
+                                }
+                                else
+                                {
+                                    g2.DrawImage(ptrv.idelImgsDuckRight[ptrv.currentIdleFrameDuckRight], ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
+                                }
+                            }
+                        }
 						else
 						{
 							g2.DrawImage(ptrv.deathDuck, ptrv.xDuck - xStart, ptrv.yDuck - yStart, 70, 70);
@@ -3518,7 +4270,39 @@ namespace Bun_Ducky
 				}
 				
 			}
-			for (int i = 0; i < paintings.Count; i++)
+
+            // draw single bullet
+            if (lvl == 2 && heros[0].singleBullet.active)
+            {
+                if (heros[0].singleBullet.goingRight)
+                {
+                    g2.DrawImage(heros[0].singleBullet.shootImgsRight[heros[0].singleBullet.currentShootFrameRight], heros[0].singleBullet.x - xStart, heros[0].singleBullet.y - yStart, 30, 20);
+                }
+                else
+                {
+                    g2.DrawImage(heros[0].singleBullet.shootImgsLeft[heros[0].singleBullet.currentShootFrameLeft], heros[0].singleBullet.x - xStart, heros[0].singleBullet.y - yStart, 30, 20);
+                }
+            }
+
+            // draw multi bullets
+            if (lvl == 2)
+            {
+                for (int b = 0; b < heros[0].bullets.Count; b++)
+                {
+                    if (heros[0].bullets[b].active)
+                    {
+                        if (heros[0].bullets[b].goingRight)
+                        {
+                            g2.DrawImage(heros[0].bullets[b].shootImgsRight[heros[0].bullets[b].currentShootFrameRight], heros[0].bullets[b].x - xStart, heros[0].bullets[b].y - yStart, 30, 20);
+                        }
+                        else
+                        {
+                            g2.DrawImage(heros[0].bullets[b].shootImgsLeft[heros[0].bullets[b].currentShootFrameLeft], heros[0].bullets[b].x - xStart, heros[0].bullets[b].y - yStart, 30, 20);
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < paintings.Count; i++)
 			{
 				painting p = paintings[i];
 				g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
@@ -3531,52 +4315,132 @@ namespace Bun_Ducky
 				g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
 			}
 
-			for (int i = 0; i < securities.Count; i++)
-			{
-				security sec = securities[i];
+            for (int i = 0; i < securities.Count; i++)
+            {
+                security sec = securities[i];
 
-				if (sec.state == 0 || sec.state == 2)
-				{
-					g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
-				}
-				else if (sec.state == 1 || (i == 1 && sec.state == 6 && sec.facingLeft))
-				{
-					g2.DrawImage(sec.walkImgsSecLeft[sec.currentWalkFrameSecLeft], sec.x - xStart, sec.y - yStart, 140, 140);
-				}
-				else if (sec.state == 3 || sec.state == 4 || (i == 1 && sec.state == 6 && !sec.facingLeft))
-				{
-					g2.DrawImage(sec.walkImgsSecRight[sec.currentWalkFrameSecRight], sec.x - xStart, sec.y - yStart, 140, 140);
-				}
-				else if (sec.state == 5)
-				{
-					g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
-				}
+                if (sec.state == 5)
+                {
+                    if (sec.secHits >= 3)
+                    {
+                        if (sec.popCt < 10)
+                        {
+                            g2.DrawImage(sec.popImgs[sec.popCt], sec.x - xStart, sec.y - yStart, 140, 140);
+                            sec.popCt++;
+                        }
+                    }
+                    else
+                    {
+                        g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
+                    }
+                }
+                else if (sec.state == 0 || sec.state == 2)
+                {
+                    g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
+                }
+                else if (sec.state == 1 || (i == 1 && sec.state == 6 && sec.facingLeft))
+                {
+                    g2.DrawImage(sec.walkImgsSecLeft[sec.currentWalkFrameSecLeft], sec.x - xStart, sec.y - yStart, 140, 140);
+                }
+                else if (sec.state == 3 || sec.state == 4 || (i == 1 && sec.state == 6 && !sec.facingLeft))
+                {
+                    g2.DrawImage(sec.walkImgsSecRight[sec.currentWalkFrameSecRight], sec.x - xStart, sec.y - yStart, 140, 140);
+                }
 
-				// state 6 phase 4 (waiting at chick) — idle frame
-				if (i == 1 && sec.state == 6 && sec.stateCt > 0 && sec.stateCt < 180
-					&& sec.x <= 550 && sec.y >= 1680)
-				{
-					g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
-				}
+                if (i == 1 && sec.state == 6 && sec.stateCt > 0 && sec.stateCt < 180
+                    && sec.x <= 550 && sec.y >= 1680)
+                {
+                    g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
+                }
 
-				
-				if (sec.state == 5 && i == 0) // Monalisa guard only
-				{
-					Font fSurprised = new Font("Arial", 22, FontStyle.Bold);
-					g2.DrawString("?!", fSurprised, Brushes.Red, sec.x - xStart + 20, sec.y - yStart - 36);
-				}
-				if (sec.state == 5 && i == 1) // Tena only
-				{
-					Font fLord = new Font("Arial", 18, FontStyle.Bold);
-					g2.DrawString("H holy f f.. fuck", fLord, Brushes.Red, sec.x - xStart + 10, sec.y - yStart - 36);
-				}
-				if (sec.state == 2 && i == 0 && heros[0].isRabbitMonalisa)
-				{
-					Font fHmm = new Font("Arial", 18, FontStyle.Bold);
-					g2.DrawString(sec.hmmStr, fHmm, Brushes.White, sec.x - xStart + 10, sec.y - yStart - 36);
-				}
-			}
-			if (!showMenu)
+                if (sec.state == 5 && i == 0)
+                {
+                    Font fSurprised = new Font("Arial", 22, FontStyle.Bold);
+                    g2.DrawString("?!", fSurprised, Brushes.Red, sec.x - xStart + 20, sec.y - yStart - 36);
+                }
+                if (sec.state == 5 && i == 1)
+                {
+                    Font fLord = new Font("Arial", 18, FontStyle.Bold);
+                    g2.DrawString("H holy f f.. fuck", fLord, Brushes.Red, sec.x - xStart + 10, sec.y - yStart - 36);
+                }
+                if (sec.state == 2 && i == 0 && heros[0].isRabbitMonalisa)
+                {
+                    Font fHmm = new Font("Arial", 18, FontStyle.Bold);
+                    g2.DrawString(sec.hmmStr, fHmm, Brushes.White, sec.x - xStart + 10, sec.y - yStart - 36);
+                }
+            }
+            if (lvl == 2 && securities.Count > 0)
+            {
+                security monSec = securities[0];
+                if (monSec.laserOn)
+                {
+                    Pen laserPen = new Pen(Color.Red, 3);
+                    g2.DrawLine(laserPen, 1156 - xStart, paintings[0].y - yStart + 20, 1385 - xStart, paintings[0].y - yStart + 20);
+                    g2.DrawLine(laserPen, 1156 - xStart, paintings[0].y - yStart + 50, 1385 - xStart, paintings[0].y - yStart + 50);
+                    g2.DrawLine(laserPen, 1156 - xStart, paintings[0].y - yStart + 80, 1385 - xStart, paintings[0].y - yStart + 80);
+                    g2.DrawLine(laserPen, 1156 - xStart, paintings[0].y - yStart + 110, 1385 - xStart, paintings[0].y - yStart + 110);
+                    g2.DrawLine(laserPen, 1156 - xStart, paintings[0].y - yStart + 140, 1385 - xStart, paintings[0].y - yStart + 140);
+                    g2.DrawLine(laserPen, 1156 - xStart, paintings[0].y - yStart + 170, 1385 - xStart, paintings[0].y - yStart + 170);
+                    g2.DrawLine(laserPen, 1156 - xStart, paintings[0].y - yStart + 200, 1385 - xStart, paintings[0].y - yStart + 200);
+                }
+            }
+            if (lvl == 2 && securities.Count > 1)
+            {
+                security tenaSec = securities[1];
+                if (tenaSec.bahActive && tenaSec.bahImgs != null && tenaSec.bahCt < tenaSec.bahImgs.Count)
+                {
+                    g2.DrawImage(tenaSec.bahImgs[tenaSec.bahCt], tenaSec.bahX - xStart, tenaSec.bahY - yStart, 190, 190);
+                }
+            }
+            // Gun Security draw (securities[2])
+            if (lvl == 2 && securities.Count > 2)
+            {
+                security gs = securities[2];
+
+                if (gs.isDeadSec)
+                {
+                    if (gs.popCt < 10)
+                    {
+                        g2.DrawImage(gs.popImgs[gs.popCt], gs.x - xStart, gs.y - yStart, 140, 140);
+                        gs.popCt++;
+                    }
+                    // after popCt >= 10: draw nothing
+                }
+                else if (!gs.seesHero)
+                {
+                    g2.DrawImage(gs.idleImgsSecB[gs.currentIdleFrameSec], gs.x - xStart, gs.y - yStart, 140, 140);
+                }
+                else if (heroXForDraw >= gs.x - 500 && heroXForDraw <= gs.x + 500)
+                {
+                    if (gs.facingLeft)
+                        g2.DrawImage(gs.idleImgsSecB[gs.currentIdleFrameSec], gs.x - xStart, gs.y - yStart, 140, 140);
+                    else
+                        g2.DrawImage(gs.idleImgsSec[gs.currentIdleFrameSec], gs.x - xStart, gs.y - yStart, 140, 140);
+                }
+                else if (gs.facingLeft)
+                {
+                    g2.DrawImage(gs.walkImgsSecLeft[gs.currentWalkFrameSecLeft], gs.x - xStart, gs.y - yStart, 140, 140);
+                }
+                else
+                {
+                    g2.DrawImage(gs.walkImgsSecRight[gs.currentWalkFrameSecRight], gs.x - xStart, gs.y - yStart, 140, 140);
+                }
+
+                if (!gs.isDeadSec && gs.gunBulletActive)
+                {
+                    if (gs.gunBulletGoingRight)
+                        g2.DrawImage(gs.gunBulletRight, gs.gunBulletX - xStart, gs.gunBulletY - yStart, 30, 15);
+                    else
+                        g2.DrawImage(gs.gunBulletLeft, gs.gunBulletX - xStart, gs.gunBulletY - yStart, 30, 15);
+                }
+
+                if (heros[0].heroHits > 0 && heros[0].heroHits < 3)
+                {
+                    Font fHit = new Font("Arial", 16, FontStyle.Bold);
+                    g2.DrawString("Hits: " + heros[0].heroHits + "/3", fHit, Brushes.Red, 10, 145);
+                }
+            }
+            if (!showMenu)
 			{
 				// dashboard
 				g2.FillRectangle(Brushes.Black, 10, 10, 160, 50);
@@ -3871,10 +4735,32 @@ namespace Bun_Ducky
 		public int y;
 		public Bitmap img;
 	}
-	class hero
+    class bullet
+    {
+        public int x;
+        public int y;
+        public List<Bitmap> shootImgsRight;
+        public List<Bitmap> shootImgsLeft;
+        public int currentShootFrameRight;
+        public int currentShootFrameLeft;
+        public bool active;
+        public bool goingRight;
+        public int rangeCt;
+        public bool animDone;
+    }
+    class hero
 	{
 		//============================
-		public bool hasKey;
+
+		public bullet singleBullet;
+		public List<bullet> bullets;
+		public bool shootSingle;
+		public bool shootMulti;
+        public bool isShooting;
+        public int shootDelay;
+
+        public int heroHits;
+        public bool hasKey;
 		public bool isDead;
 		public bool repairedElevator;
 		public bool stoleTut;
@@ -3896,9 +4782,11 @@ namespace Bun_Ducky
 		public Bitmap falling;
 		public Bitmap deathDuck;
 		public Bitmap hitWallDuck;
+		public Bitmap shootDuck;
+        public Bitmap shootDuckB;
+        public int shootPoseCt;
 
-
-		public int currentClimbFramesDuck;
+        public int currentClimbFramesDuck;
 		public int currentWalkFramesDuckRight;
 		public int currentWalkFramesDuckLeft;
 
@@ -4027,7 +4915,31 @@ namespace Bun_Ducky
 		public int hmmCt;
 		public bool paintingWasStolen;
 		public bool reached;
-	}
+
+        public List<Bitmap> idleImgsSecB;
+        public bool seesHero;
+        public Bitmap gunBulletLeft;
+        public Bitmap gunBulletRight;
+        public int gunBulletX;
+        public int gunBulletY;
+        public bool gunBulletActive;
+        public bool gunBulletGoingRight;
+        public int gunBulletRangeCt;
+        public int gunShootDelay;
+
+        public bool isDeadSec;
+        public int popCt;
+
+        public int secHits;
+        public List<Bitmap> popImgs;
+        public List<Bitmap> bahImgs;
+        public int bahCt;
+        public bool bahActive;
+        public int bahX;
+        public int bahY;
+
+        public bool laserOn;
+    }
 	class tile
 	{
 		public int x;

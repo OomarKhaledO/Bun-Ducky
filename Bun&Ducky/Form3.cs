@@ -13,7 +13,7 @@ namespace Bun_Ducky
     public partial class Form3 : Form
     {
         string code = "";
-        string correctCode = "2102";
+        string correctCode = "2205";
         public  bool Complete = false;
       
         public Form3()

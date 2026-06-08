@@ -295,7 +295,7 @@ namespace Bun_Ducky
             for (int i = 0; i < bgs.Count; i++)
             {
                 bg ptrv = bgs[i];
-                
+
                 g2.DrawImage(ptrv.img, dst, src, GraphicsUnit.Pixel);
             }
             for (int r = 0; r < m; r++)
@@ -311,17 +311,19 @@ namespace Bun_Ducky
                         hh = 100;
                     }
 
-                        g2.DrawImage(ptrv.imgs[ptrv.cF], ptrv.x, ptrv.y, ww, hh);
-
-                    if (r == sensorR && c == sensorC)
-                    {
-                        if (caught)
-                        {
-                            ptrv.cF= 1;
-                        }
-                        g2.DrawImage(sensorImgs[ptrv.cF], ptrv.x, ptrv.y, 80, 80);
-                    }
+                    g2.DrawImage(ptrv.imgs[ptrv.cF], ptrv.x, ptrv.y, ww, hh);
                 }
+            }
+
+            
+            cube sensorCube = cubes[sensorR, sensorC];
+            if (caught)
+            {
+                g2.DrawImage(sensorImgs[1], sensorCube.x, sensorCube.y, 80, 80);
+            }
+            else
+            {
+                g2.DrawImage(sensorImgs[0], sensorCube.x, sensorCube.y, 80, 80);
             }
         }
 
