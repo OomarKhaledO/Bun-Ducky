@@ -20,7 +20,8 @@ namespace Bun_Ducky
 		List<painting> paintings = new List<painting>();
 		List<door> doors = new List<door>();
 		List<items> item = new List<items>();
-		List<bg> bgs = new List<bg>();
+        List<map> maps = new List<map>();
+        List<bg> bgs = new List<bg>();
 		List<hero> heros = new List<hero>();
 		List<tile> tilesLvl1 = new List<tile>();
 		List<tile> tilesPLvl1 = new List<tile>();
@@ -328,6 +329,7 @@ namespace Bun_Ducky
 			}
 			pnn.rabbitMonalisa = new Bitmap("rFrames\\monalisa\\rabbitMonalisa.png");
 			pnn.rabbitTut = new Bitmap("rFrames\\tut\\rabbitTut.png");
+			pnn.rabbitMap = new Bitmap("rFrames\\map\\rabbitMap.png");
 			//   === RABBIT /> ===
 			pnn.transformImgs = new List<Bitmap>();
 			for (int i = 0; i < 10; i++)
@@ -938,7 +940,8 @@ namespace Bun_Ducky
 			elevators.Clear();
 			securities.Clear();
 			item.Clear();
-			paintings.Clear();
+            maps.Clear();
+            paintings.Clear();
 
 
 			if (heros.Count > 0)
@@ -1385,7 +1388,17 @@ namespace Bun_Ducky
 				itemm.height = 200;
 				itemm.img = new Bitmap("lvl2\\tut2.png");
 				item.Add(itemm);
-				bg bb = new bg();
+
+                map mapItem = new map();
+                mapItem.x = 902;
+                mapItem.y = 973;
+                mapItem.width = 120;
+                mapItem.height = 120;
+                mapItem.img = new Bitmap("lvl2\\map.png");
+                maps.Add(mapItem);
+
+
+                bg bb = new bg();
 				bb.img = new Bitmap("bg2.png");
 				bb.X = 0;
 				bb.Y = 0;
@@ -2553,10 +2566,61 @@ namespace Bun_Ducky
 								heroY = heros[0].yDuck;
 								
                             }
+
+                            // map mimick reaction
+                            if (heros[0].isRabbitMap && !sec.sawMap && sec.state == 6)
+                            {
+								if (sec.x > 902 && sec.x < 902 + 250
+									&&
+									sec.y > 973 && sec.y < 973 + 150 + 100 && !sec.sawmapBefore)
+								{
+									sec.sawMap = true;
+									sec.mapHmmCt = 0;
+									sec.mapHmmStr = "Hmm...";
+								}
+                            }
+
+                            if (sec.sawMap)
+                            {
+                                sec.mapHmmCt++;
+                                if (sec.mapHmmCt < 30)
+                                {
+                                    sec.mapHmmStr = "Hmm...";
+                                }
+                                else if (sec.mapHmmCt < 60)
+                                {
+                                    sec.mapHmmStr = "Africa...";
+                                }
+                                else if (sec.mapHmmCt < 90)
+                                {
+                                    sec.mapHmmStr = "Asia...";
+                                }
+                                else if (sec.mapHmmCt < 120)
+                                {
+                                    sec.mapHmmStr = "Europe...";
+                                }
+                                else if (sec.mapHmmCt < 150)
+                                {
+                                    sec.mapHmmStr = "America...";
+                                }
+                                else if (sec.mapHmmCt < 200)
+                                {
+                                    sec.mapHmmStr = "I should have not dropped school.";
+                                }
+                                else
+                                {
+                                    sec.sawMap = false;
+									sec.sawmapBefore = true;
+                                    sec.mapHmmCt = 0;
+                                    sec.mapHmmStr = "";
+                                }
+                            }
+
+
                             if (!sec.bahActive)
                             {
-								if (!heros[0].isRabbitTut && heros[0].isRabbitMonalisa)
-								{
+                                if (!heros[0].isRabbitTut && !heros[0].isRabbitMonalisa && !heros[0].isRabbitMap)
+                                {
 									if (heroX >= sec.x - 500 && heroX <= sec.x + 500)
 									{
 										if (heroY >= sec.y - 200 && heroY <= sec.y + 200)
@@ -2599,120 +2663,123 @@ namespace Bun_Ducky
                             }
                             else if (sec.state == 6)
 							{
-								// PHASE 0: x-- until x <= 1165
-								if (sec.x > 1165 && !sec.reached)
+								if (!sec.sawMap)
 								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.x -= 10;
-								}
-								// PHASE 0b: y++ until y >= 1150 (step down to lower floor)
-								else if (sec.y < 1100 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.y += 5;
-									sec.x -= 10;
-								}
-								// PHASE 1: x-- until x <= 805
-								else if (sec.x > 800 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.x -= 10;
-								}
-								// PHASE 2: y++ until y >= 1680 (climb down ladder)
-								else if (sec.y < 1620 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.y += 8;
-								}
-								// PHASE 3: x-- until x <= 550
-								else if (sec.x > 550 && !sec.reached)
-								{
-									sec.currentWalkFrameSecLeft =
-										(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
-									sec.facingLeft = true;
-									sec.x -= 8;
-								}
-								// PHASE 4: wait at chick
-								else if (sec.stateCt < 180)
-								{
-									sec.reached = true;
-									sec.currentIdleFrameSec =
-										(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
-									sec.stateCt++;
-								}
-								// RETURN PHASE 5: x++ until x >= 805
-								else if (sec.x < 800)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.facingLeft = false;
-									sec.x += 8;
-									heros[0].distract = null;
-								}
-								// RETURN PHASE 6: y-- until y <= 1150 (climb up ladder)
-								else if (sec.y > 1100)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.y -= 8;
-								}
-
-								// RETURN PHASE 7: x++ until x >= 1165
-								else if (sec.x < 1165)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.facingLeft = false;
-									sec.x += 10;
-								}
-								else if (sec.y > 1062)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.facingLeft = false;
-									sec.y -= 5;
-									sec.x += 10;
-								}
-								// RETURN PHASE 7b: y++ until y >= 1062 (step back up to original floor)
-
-								// RETURN PHASE 8: x++ until x >= startX
-								else if (sec.x < sec.startX)
-								{
-									sec.currentWalkFrameSecRight =
-										(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
-									sec.facingLeft = false;
-									sec.x += 10;
-								}
-								else
-								{
-									// back home
-									sec.x = sec.startX;
-									sec.stateCt = 0;
-									sec.state = 0;
-									sec.facingLeft = true;
-
-									if (sec.reached)
+									// PHASE 0: x-- until x <= 1165
+									if (sec.x > 1165 && !sec.reached)
 									{
-										chick dc = new chick();
-										dc.imgs = new List<Bitmap>();
-										for (int j = 0; j < 16; j++)
-										{
-											dc.imgs.Add(chickImgs[j]);
-										}
-										dc.x = 0;
-										dc.y = 0;
-										heros[0].distract = dc;
-										heros[0].chickHoldCt = 0;
-										sec.reached = false;
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.x -= 10;
+									}
+									// PHASE 0b: y++ until y >= 1150 (step down to lower floor)
+									else if (sec.y < 1100 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.y += 5;
+										sec.x -= 10;
+									}
+									// PHASE 1: x-- until x <= 805
+									else if (sec.x > 800 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.x -= 10;
+									}
+									// PHASE 2: y++ until y >= 1680 (climb down ladder)
+									else if (sec.y < 1620 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.y += 8;
+									}
+									// PHASE 3: x-- until x <= 550
+									else if (sec.x > 550 && !sec.reached)
+									{
+										sec.currentWalkFrameSecLeft =
+											(sec.currentWalkFrameSecLeft + 1) % sec.walkImgsSecLeft.Count;
+										sec.facingLeft = true;
+										sec.x -= 8;
+									}
+									// PHASE 4: wait at chick
+									else if (sec.stateCt < 180)
+									{
+										sec.reached = true;
+										sec.currentIdleFrameSec =
+											(sec.currentIdleFrameSec + 1) % sec.idleImgsSec.Count;
+										sec.stateCt++;
+									}
+									// RETURN PHASE 5: x++ until x >= 805
+									else if (sec.x < 800)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.x += 8;
+										heros[0].distract = null;
+									}
+									// RETURN PHASE 6: y-- until y <= 1150 (climb up ladder)
+									else if (sec.y > 1100)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.y -= 8;
 									}
 
+									// RETURN PHASE 7: x++ until x >= 1165
+									else if (sec.x < 1165)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.x += 10;
+									}
+									else if (sec.y > 1062)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.y -= 5;
+										sec.x += 10;
+									}
+									// RETURN PHASE 7b: y++ until y >= 1062 (step back up to original floor)
+
+									// RETURN PHASE 8: x++ until x >= startX
+									else if (sec.x < sec.startX)
+									{
+										sec.currentWalkFrameSecRight =
+											(sec.currentWalkFrameSecRight + 1) % sec.walkImgsSecRight.Count;
+										sec.facingLeft = false;
+										sec.x += 10;
+									}
+									else
+									{
+										// back home
+										sec.x = sec.startX;
+										sec.stateCt = 0;
+										sec.state = 0;
+										sec.facingLeft = true;
+										sec.sawmapBefore = false;
+										if (sec.reached)
+										{
+											chick dc = new chick();
+											dc.imgs = new List<Bitmap>();
+											for (int j = 0; j < 16; j++)
+											{
+												dc.imgs.Add(chickImgs[j]);
+											}
+											dc.x = 0;
+											dc.y = 0;
+											heros[0].distract = dc;
+											heros[0].chickHoldCt = 0;
+											sec.reached = false;
+										}
+
+									}
 								}
 							}
 						}
@@ -3543,7 +3610,18 @@ namespace Bun_Ducky
 							heros[0].isRabbitTut = true;
 						}
 					}
-				}
+
+                    if (heros[0].isRat)
+                    {
+                        if (heros[0].xRabbit > 900 && heros[0].xRabbit < 900 + 250
+                            &&
+                            heros[0].yRabbit > 969 && heros[0].yRabbit < 969 + 400)
+                        {
+                            heros[0].isRabbitMap = true;
+							
+                        }
+                    }
+                }
                 if (e.KeyCode == Keys.Z)
                 {
                     if (lvl == 2 && !heros[0].singleBullet.active)
@@ -3917,7 +3995,8 @@ namespace Bun_Ducky
 				{
 					heros[0].isRabbitMonalisa = false;
 					heros[0].isRabbitTut = false;
-				}
+                    heros[0].isRabbitMap = false;
+                }
 			}
 			else
 			{
@@ -4085,7 +4164,18 @@ namespace Bun_Ducky
 				elevator ptrv = elevators[i];
 				g2.DrawImage(ptrv.img, ptrv.x - xStart, ptrv.y - yStart, ptrv.img.Width, ptrv.img.Height);
 			}
-			for (int i = 0; i < heros.Count; i++)
+            if (!heros[0].isRabbitMap)
+            {
+                for (int i = 0; i < maps.Count; i++)
+                {
+                    map p = maps[i];
+
+                    g2.DrawImage(p.img, p.x - xStart, p.y - yStart, 250, 150);
+
+                }
+            }
+
+            for (int i = 0; i < heros.Count; i++)
 			{
 				hero ptrv = heros[i];
 
@@ -4136,7 +4226,11 @@ namespace Bun_Ducky
 						{
 							g2.DrawImage(ptrv.rabbitTut, 1859 - xStart, 920 - yStart, 180, 200);
 						}
-						else
+                        else if (ptrv.isRabbitMap)
+                        {
+                            g2.DrawImage(ptrv.rabbitMap, 902 - xStart, 973 - yStart, 250, 150);
+                        }
+                        else
 						{
 							g2.DrawImage(ptrv.idleImgsRabbitRight[ptrv.currentIdelFrameRabbitRight], ptrv.xRabbit - xStart, ptrv.yRabbit - yStart, 100, 100);
 						}
@@ -4314,7 +4408,7 @@ namespace Bun_Ducky
 				items p = item[i];
 				g2.DrawImage(p.img, p.x - xStart, p.y - yStart, p.width, p.height);
 			}
-
+            
             for (int i = 0; i < securities.Count; i++)
             {
                 security sec = securities[i];
@@ -4333,6 +4427,12 @@ namespace Bun_Ducky
                     {
                         g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
                     }
+                }
+                if (i == 1 && sec.sawMap && sec.mapHmmStr != "")
+                {
+                    Font fMap = new Font("Arial", 16, FontStyle.Bold);
+                    g2.DrawImage(sec.idleImgsSec[sec.currentIdleFrameSec], sec.x - xStart, sec.y - yStart, 140, 140);
+                    g2.DrawString(sec.mapHmmStr, fMap, Brushes.Yellow, sec.x - xStart - 20, sec.y - yStart - 40);
                 }
                 else if (sec.state == 0 || sec.state == 2)
                 {
@@ -4838,8 +4938,10 @@ namespace Bun_Ducky
 		public List<Bitmap> climbImgsRabbitLeft;
 		public Bitmap rabbitMonalisa;
 		public Bitmap rabbitTut;
+		public Bitmap rabbitMap;
 		public bool isRabbitMonalisa;
 		public bool isRabbitTut;
+		public bool isRabbitMap;
 
 		public int currentWalkFrameRabbitRight;
 		public int currentWalkFrameRabbitLeft;
@@ -4939,6 +5041,11 @@ namespace Bun_Ducky
         public int bahY;
 
         public bool laserOn;
+
+        public bool sawMap;
+        public int mapHmmCt;
+        public string mapHmmStr;
+		public bool sawmapBefore;
     }
 	class tile
 	{
@@ -5021,7 +5128,15 @@ namespace Bun_Ducky
 		public int height;
 		public Bitmap img;
 	}
-	class elevator
+    class map
+    {
+        public int x;
+        public int y;
+        public int width;
+        public int height;
+        public Bitmap img;
+    }
+    class elevator
 	{
 		public int x;
 		public int y;

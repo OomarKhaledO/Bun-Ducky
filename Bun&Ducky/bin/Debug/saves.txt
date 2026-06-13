@@ -1,7 +1,8 @@
 ID,Level,Score,HasKey,IsRat,DuckX,DuckY,RabbitX,RabbitY,KeysCollected,ChicksCollected,repairedElevator,stoleTut
 1,1,10,True,False,1695,330,2115,1650,23,0,False,False
 2,2,10,False,False,795,2764,2000,1650,0,1,False,False
-3,2,0,False,False,1035,2094,2115,1650,0,1,True,False
+3,2,0,False,True,900,1145,910,1115,0,1,True,False
 4,2,60,False,False,1615,1118,100,470,0,1,False,True
 5,2,10,False,False,100,580,100,470,0,1,False,False
 6,2,10,False,False,775,5192,795,1670,0,1,False,False
+7,2,10,False,False,305,1676,915,2064,0,1,True,False
